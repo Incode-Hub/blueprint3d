@@ -326,14 +326,16 @@ var SideMenu = function(blueprint3d, floorplanControls, modalEffects) {
     $("#add-items").find(".add-item").mousedown(function(e) {
       var modelUrl = $(this).attr("model-url");
       var itemType = parseInt($(this).attr("model-type"));
+      var thumbnailUrl = $(this).attr("model-image") || $(this).find('img').attr('src');
       var metadata = {
         itemName: $(this).attr("model-name"),
         resizable: true,
         modelUrl: modelUrl,
-        itemType: itemType
+        itemType: itemType,
+        thumbnailUrl: thumbnailUrl
       }
 
-      blueprint3d.model.scene.addItem(itemType, modelUrl, metadata);
+      var item = blueprint3d.model.scene.addItem(itemType, modelUrl, metadata);
       setCurrentState(scope.states.DEFAULT);
     });
 
@@ -343,14 +345,16 @@ var SideMenu = function(blueprint3d, floorplanControls, modalEffects) {
       if (!$(this).data('static-bound')) {
         var modelUrl = $(this).attr("model-url");
         var itemType = parseInt($(this).attr("model-type"));
+        var thumbnailUrl = $(this).attr("model-image") || $(this).find('img').attr('src');
         var metadata = {
           itemName: $(this).attr("model-name"),
           resizable: true,
           modelUrl: modelUrl,
-          itemType: itemType
+          itemType: itemType,
+          thumbnailUrl: thumbnailUrl
         }
 
-        blueprint3d.model.scene.addItem(itemType, modelUrl, metadata);
+        var item = blueprint3d.model.scene.addItem(itemType, modelUrl, metadata);
         setCurrentState(scope.states.DEFAULT);
       }
     });
@@ -542,6 +546,25 @@ $(document).ready(function() {
   var textureSelector = new TextureSelector(blueprint3d, sideMenu);        
   var cameraButtons = new CameraButtons(blueprint3d);
   mainControls(blueprint3d);
+  
+  // Initialize PDF exporter
+  var pdfExporter = new PDFExporter(blueprint3d);
+  
+  // Set up PDF export buttons
+  // Export 3D View functionality removed
+  
+  // Export Selected Items functionality removed
+  
+  $("#export-items-list").click(function() {
+    pdfExporter.exportAllItemsAsList();
+  });
+  
+  $("#clear-selected-items").click(function() {
+    pdfExporter.clearSelectedItems();
+  });
+  
+  // Update selected items count
+  pdfExporter.updateSelectedItemsCount();
 
   // This serialization format needs work
   // Load a simple rectangle room
