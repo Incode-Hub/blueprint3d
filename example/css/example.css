@@ -2,7 +2,7 @@
  * General Formatting
  */
 
-html {
+ html {
   overflow: hidden;
   height: 100%;
 }
@@ -71,6 +71,7 @@ div {
   height: 100%;
   padding: 20px;
   background-color: rgba(50, 50, 50, 0.9);
+  display: none; /* Initially hidden */
 }
 
 #loading-modal  h1 {
@@ -80,19 +81,19 @@ div {
 }
 
 /*
- * Design
+ * Design - FIXED: Set proper initial display states
  */
 
 #viewer {
-  display: none;
+  display: none; /* Will be shown when Design tab is clicked */
 }
 
 #floorplanner {
-  display: none;
+  display: block; /* Show by default since it's the initial state */
 }
 
 #add-items {
-  display: none;
+  display: none; /* Will be shown when Add Items tab is clicked */
   padding: 20px;
   overflow-y: auto; 
 }
@@ -153,4 +154,141 @@ div {
   opacity: 0;
   cursor: inherit;
   display: block;
+}
+
+/* Additional styles for category navigation */
+
+/* Category folder styling */
+.category-folder {
+  transition: all 0.3s ease !important;
+  cursor: pointer;
+  border-radius: 8px !important;
+  background: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.category-folder:hover {
+  border-color: #337ab7 !important;
+  box-shadow: 0 4px 15px rgba(51, 122, 183, 0.2) !important;
+  transform: translateY(-3px) !important;
+  text-decoration: none !important;
+}
+
+.category-folder:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #337ab7, #5bc0de);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.category-folder:hover:before {
+  transform: scaleX(1);
+}
+
+/* Back button styling */
+#back-to-categories {
+  transition: all 0.2s ease;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-weight: 500;
+}
+
+#back-to-categories:hover {
+  background-color: #337ab7;
+  color: white;
+  border-color: #337ab7;
+  transform: translateX(-2px);
+}
+
+/* Item thumbnail enhancements */
+.add-item {
+  transition: all 0.3s ease !important;
+  border-radius: 8px !important;
+  overflow: hidden;
+  position: relative;
+  background: #fff;
+}
+
+.add-item:hover {
+  transform: translateY(-5px) scale(1.02) !important;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+  border-color: #337ab7 !important;
+  text-decoration: none !important;
+}
+
+.add-item img {
+  transition: all 0.3s ease;
+  border-radius: 4px;
+}
+
+.add-item:hover img {
+  transform: scale(1.1);
+}
+
+/* Category header styling */
+.category-header {
+  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid #dee2e6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .category-folder {
+    margin-bottom: 10px;
+  }
+  
+  .category-folder div {
+    font-size: 36px !important;
+  }
+  
+  #back-to-categories {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+/* Loading animation for category switch */
+.category-transition {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Icon animations */
+.category-folder .glyphicon {
+  transition: all 0.3s ease;
+}
+
+.category-folder:hover .glyphicon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+/* Breadcrumb styling */
+.category-breadcrumb {
+  background: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+  font-size: 14px;
+}
+
+.category-breadcrumb > li + li:before {
+  content: "→";
+  color: #999;
+  padding: 0 8px;
 }

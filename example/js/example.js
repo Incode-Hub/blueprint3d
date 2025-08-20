@@ -1,4 +1,3 @@
-
 /*
  * Camera Buttons
  */
@@ -319,11 +318,11 @@ var SideMenu = function(blueprint3d, floorplanControls, modalEffects) {
   function handleWindowResize() {
     $(".sidebar").height(window.innerHeight);
     $("#add-items").height(window.innerHeight);
-
   };
 
-  // TODO: this doesn't really belong here
+  // Handle both static items and dynamically added items
   function initItems() {
+    // For static items (original functionality)
     $("#add-items").find(".add-item").mousedown(function(e) {
       var modelUrl = $(this).attr("model-url");
       var itemType = parseInt($(this).attr("model-type"));
@@ -336,6 +335,24 @@ var SideMenu = function(blueprint3d, floorplanControls, modalEffects) {
 
       blueprint3d.model.scene.addItem(itemType, modelUrl, metadata);
       setCurrentState(scope.states.DEFAULT);
+    });
+
+    // For dynamically added items (category system)
+    $("#add-items").on('mousedown', '.add-item', function(e) {
+      // Only handle if not already handled by the find() above
+      if (!$(this).data('static-bound')) {
+        var modelUrl = $(this).attr("model-url");
+        var itemType = parseInt($(this).attr("model-type"));
+        var metadata = {
+          itemName: $(this).attr("model-name"),
+          resizable: true,
+          modelUrl: modelUrl,
+          itemType: itemType
+        }
+
+        blueprint3d.model.scene.addItem(itemType, modelUrl, metadata);
+        setCurrentState(scope.states.DEFAULT);
+      }
     });
   }
 
