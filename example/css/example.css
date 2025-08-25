@@ -292,3 +292,64 @@ div {
   color: #999;
   padding: 0 8px;
 }
+
+/* Make overlay UIs not block drags except on the buttons themselves */
+#camera-controls, #main-controls { pointer-events: none; }
+#camera-controls .btn, #main-controls .btn { pointer-events: auto; }
+
+/* Make sure the canvas doesn’t trigger browser panning/zooming on touch */
+#viewer canvas { touch-action: none; }
+
+/* Mobile Item Controls */
+#mobile-item-controls{
+  position:absolute;
+  left:12px; bottom:12px;
+  z-index: 9999;
+  pointer-events:auto; /* ensure clicks work even if other overlays use pointer-events:none */
+  display:none; /* hidden by default; JS will show when an item is selected on mobile */
+}
+
+#mobile-item-controls .mic-grid{
+  display:grid;
+  grid-template-columns: 60px 80px 60px;
+  grid-template-rows: 60px 60px;
+  gap:10px;
+  align-items:center;
+  justify-items:center;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(4px);
+  border-radius: 14px;
+  padding:10px;
+}
+
+#mobile-item-controls .mic-btn{
+  width:60px; height:60px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.85);
+  font-size:22px;
+  line-height:60px;
+  text-align:center;
+  user-select:none;
+}
+
+#mobile-item-controls .mic-rot-wrap{
+  display:flex; gap:10px;
+}
+
+#mobile-item-controls .mic-rot{
+  width:60px; height:60px;
+}
+
+#mobile-item-controls .mic-step{
+  width:80px;
+  font-size:14px;
+}
+
+/* Show controls only on small screens */
+@media (max-width: 768px){
+  #mobile-item-controls{ display:block; }
+}
+
+/* Important: prevent browser gestures over the canvas */
+#viewer canvas { touch-action: none; }

@@ -207,6 +207,21 @@
             <div id="loading-modal">
               <h1>Loading...</h1>  
             </div>
+
+            <div id="mobile-item-controls" aria-hidden="true">
+              <div class="mic-grid">
+                <button class="mic-btn mic-move" data-dx="0" data-dz="-1" aria-label="Move up">▲</button>
+                <div class="mic-rot-wrap">
+                  <button class="mic-btn mic-rot" data-deg="-5" aria-label="Rotate left">⟲</button>
+                  <button class="mic-btn mic-rot" data-deg="5" aria-label="Rotate right">⟳</button>
+                </div>
+                <button class="mic-btn mic-move" data-dx="0" data-dz="1" aria-label="Move down">▼</button>
+          
+                <button class="mic-btn mic-move" data-dx="-1" data-dz="0" aria-label="Move left">◀</button>
+                <button class="mic-btn mic-step" id="mic-step">5cm</button>
+                <button class="mic-btn mic-move" data-dx="1" data-dz="0" aria-label="Move right">▶</button>
+              </div>
+            </div>
           </div>
 
           <!-- 2D Floorplanner -->
