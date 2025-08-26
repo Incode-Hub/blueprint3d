@@ -1,355 +1,138 @@
-/*
- * General Formatting
- */
+/* ===== General Formatting ===== */
+html { overflow: hidden; height: 100%; }
+body { margin: 0; padding: 0; overflow: hidden; height: 100%; }
+div { margin: 0; padding: 0; }
 
- html {
-  overflow: hidden;
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  height: 100%;
-}
-
-div {
-  margin: 0;
-  padding: 0;
-}
-
-/*
- * Sidebar
- */
-
-.main-row {
-  padding: 0;
-}
-
+/* ===== Sidebar ===== */
+.main-row { padding: 0; }
 .sidebar {
   padding: 20px;
   overflow-x: hidden;
-  overflow-y: auto; 
+  overflow-y: auto;
   border-right: 1px solid #eee;
 }
-
-.nav-sidebar {
-  margin-right: -21px; /* 20px padding + 1px border */
-  margin-bottom: 20px;
-  margin-left: -20px;
-}
-.nav-sidebar > li > a {
-  padding-right: 20px;
-  padding-left: 20px;
-}
+.nav-sidebar { margin-right: -21px; margin-bottom: 20px; margin-left: -20px; }
+.nav-sidebar > li > a { padding-right: 20px; padding-left: 20px; }
 .nav-sidebar > .active > a,
 .nav-sidebar > .active > a:hover,
 .nav-sidebar > .active > a:focus {
-  color: #fff;
-  background-color: #428bca;
+  color: #fff; background-color: #428bca;
 }
 
-/*
- * Main content
- */
+/* ===== Main content ===== */
+.main { padding: 0; }
 
-.main {
-  padding: 0;
-}
-
-/*
- * "Loading" modal
- */
-
+/* ===== Loading modal ===== */
 #loading-modal {
-  position: absolute;
-  z-index: 10;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  padding: 20px;
-  background-color: rgba(50, 50, 50, 0.9);
-  display: none; /* Initially hidden */
+  position: absolute; z-index: 10; left: 0; top: 0; width: 100%; height: 100%;
+  padding: 20px; background-color: rgba(50,50,50,0.9); display: none;
 }
+#loading-modal h1 { text-align: center; margin-top: 30%; color: #fff; }
 
-#loading-modal  h1 {
-  text-align: center; 
-  margin-top: 30%;
-  color: #fff;
-}
+/* ===== Initial tab visibility ===== */
+#viewer { display: none; }
+#floorplanner { display: block; }
+#add-items { display: none; padding: 20px; overflow-y: auto; }
 
-/*
- * Design - FIXED: Set proper initial display states
- */
-
-#viewer {
-  display: none; /* Will be shown when Design tab is clicked */
-}
-
-#floorplanner {
-  display: block; /* Show by default since it's the initial state */
-}
-
-#add-items {
-  display: none; /* Will be shown when Add Items tab is clicked */
-  padding: 20px;
-  overflow-y: auto; 
-}
-
-#main-controls {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  padding: 0;  
-}
-
-#camera-controls {
-  position: absolute;
-  bottom: 20px;
-  right: 0;
-  padding: 0 20px;  
-  text-align: right;
-}
+/* ===== Overlay controls ===== */
+#main-controls { position: absolute; top: 20px; left: 20px; padding: 0; }
+#camera-controls { position: absolute; bottom: 20px; right: 0; padding: 0 20px; text-align: right; }
 
 #floorplanner-controls {
-  position: absolute;
-  left: 0;
-  top: 0;
-  margin: 20px 0;
-  padding: 0 20px; 
-  width: 100%;
+  position: absolute; left: 0; top: 0; margin: 20px 0; padding: 0 20px; width: 100%;
 }
 
 #draw-walls-hint {
-  position: absolute;
-  left: 20px;
-  bottom: 20px;
-  background-color: rgba(0, 0, 0, 0.50);
-  color: #ffffff;
-  padding: 5px 10px;
-  z-index: 10;
-  display: none;
+  position: absolute; left: 20px; bottom: 20px;
+  background-color: rgba(0,0,0,0.50); color: #fff; padding: 5px 10px; z-index: 10; display: none;
 }
 
-.add-item {
-  cursor: pointer;
-}
-
-.btn-file {
-  display: inline-block;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-file input[type=file] {
-  position: absolute;
-  top: 0;
-  right: 0;
-  min-width: 100%;
-  min-height: 100%;
-  filter: alpha(opacity=0);
-  opacity: 0;
-  cursor: inherit;
-  display: block;
-}
-
-/* Additional styles for category navigation */
-
-/* Category folder styling */
-.category-folder {
-  transition: all 0.3s ease !important;
-  cursor: pointer;
-  border-radius: 8px !important;
-  background: #fff;
-  position: relative;
-  overflow: hidden;
-}
-
-.category-folder:hover {
-  border-color: #337ab7 !important;
-  box-shadow: 0 4px 15px rgba(51, 122, 183, 0.2) !important;
-  transform: translateY(-3px) !important;
-  text-decoration: none !important;
-}
-
-.category-folder:before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #337ab7, #5bc0de);
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-}
-
-.category-folder:hover:before {
-  transform: scaleX(1);
-}
-
-/* Back button styling */
-#back-to-categories {
-  transition: all 0.2s ease;
-  border-radius: 20px;
-  padding: 8px 16px;
-  font-weight: 500;
-}
-
-#back-to-categories:hover {
-  background-color: #337ab7;
-  color: white;
-  border-color: #337ab7;
-  transform: translateX(-2px);
-}
+/* File input styling */
+.add-item { cursor: pointer; transition: all .3s ease !important; border-radius:8px !important; overflow:hidden; background:#fff; position:relative; }
+.btn-file { display:inline-block; cursor:pointer; position:relative; overflow:hidden; }
+.btn-file input[type=file] { position:absolute; top:0; right:0; min-width:100%; min-height:100%; opacity:0; cursor:inherit; display:block; }
 
 /* Item thumbnail enhancements */
-.add-item {
-  transition: all 0.3s ease !important;
-  border-radius: 8px !important;
-  overflow: hidden;
-  position: relative;
-  background: #fff;
-}
+.add-item:hover { transform: translateY(-5px) scale(1.02) !important; box-shadow:0 8px 25px rgba(0,0,0,0.15) !important; border-color:#337ab7 !important; text-decoration:none !important; }
+.add-item img { transition: all .3s ease; border-radius:4px; }
+.add-item:hover img { transform: scale(1.1); }
 
-.add-item:hover {
-  transform: translateY(-5px) scale(1.02) !important;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
-  border-color: #337ab7 !important;
-  text-decoration: none !important;
-}
+/* Category folder/headers (optional) */
+.category-folder { transition: all .3s ease !important; cursor:pointer; border-radius:8px !important; background:#fff; position:relative; overflow:hidden; }
+.category-folder:hover { border-color:#337ab7 !important; box-shadow:0 4px 15px rgba(51,122,183,.2) !important; transform: translateY(-3px) !important; text-decoration:none !important; }
+.category-folder:before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background: linear-gradient(90deg,#337ab7,#5bc0de); transform: scaleX(0); transition: transform .3s ease; }
+.category-folder:hover:before { transform: scaleX(1); }
+.category-header { background: linear-gradient(135deg,#f8f9fa,#e9ecef); border-radius:8px; padding:15px; margin-bottom:20px; border:1px solid #dee2e6; }
+.category-breadcrumb { background:none; padding:0; margin:0 0 20px 0; font-size:14px; }
+.category-breadcrumb > li + li:before { content: "→"; color:#999; padding: 0 8px; }
 
-.add-item img {
-  transition: all 0.3s ease;
-  border-radius: 4px;
-}
-
-.add-item:hover img {
-  transform: scale(1.1);
-}
-
-/* Category header styling */
-.category-header {
-  background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 20px;
-  border: 1px solid #dee2e6;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .category-folder {
-    margin-bottom: 10px;
-  }
-  
-  .category-folder div {
-    font-size: 36px !important;
-  }
-  
-  #back-to-categories {
-    padding: 6px 12px;
-    font-size: 12px;
-  }
-}
-
-/* Loading animation for category switch */
-.category-transition {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInUp 0.4s ease forwards;
-}
-
-@keyframes fadeInUp {
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Icon animations */
-.category-folder .glyphicon {
-  transition: all 0.3s ease;
-}
-
-.category-folder:hover .glyphicon {
-  transform: scale(1.1) rotate(5deg);
-}
-
-/* Breadcrumb styling */
-.category-breadcrumb {
-  background: none;
-  padding: 0;
-  margin: 0 0 20px 0;
-  font-size: 14px;
-}
-
-.category-breadcrumb > li + li:before {
-  content: "→";
-  color: #999;
-  padding: 0 8px;
-}
-
-/* Make overlay UIs not block drags except on the buttons themselves */
+/* Do not block drags except on buttons */
 #camera-controls, #main-controls { pointer-events: none; }
 #camera-controls .btn, #main-controls .btn { pointer-events: auto; }
 
-/* Make sure the canvas doesn’t trigger browser panning/zooming on touch */
+/* Prevent browser gestures on the WebGL canvas */
 #viewer canvas { touch-action: none; }
 
-/* Mobile Item Controls */
+/* ===== Mobile Item Controls ===== */
 #mobile-item-controls{
-  position:absolute;
-  left:12px; bottom:12px;
-  z-index: 9999;
-  pointer-events:auto; /* ensure clicks work even if other overlays use pointer-events:none */
-  display:none; /* hidden by default; JS will show when an item is selected on mobile */
+  position:absolute; left:12px; bottom:12px; z-index:9999;
+  pointer-events:auto; display:none;
 }
-
 #mobile-item-controls .mic-grid{
-  display:grid;
-  grid-template-columns: 60px 80px 60px;
-  grid-template-rows: 60px 60px;
-  gap:10px;
-  align-items:center;
-  justify-items:center;
-  background: rgba(0,0,0,0.35);
-  backdrop-filter: blur(4px);
-  border-radius: 14px;
-  padding:10px;
+  display:grid; grid-template-columns:60px 80px 60px; grid-template-rows:60px 60px;
+  gap:10px; align-items:center; justify-items:center;
+  background: rgba(0,0,0,.35); backdrop-filter: blur(4px);
+  border-radius:14px; padding:10px;
 }
-
 #mobile-item-controls .mic-btn{
-  width:60px; height:60px;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.25);
-  background: rgba(255,255,255,0.85);
-  font-size:22px;
-  line-height:60px;
-  text-align:center;
-  user-select:none;
+  width:60px; height:60px; border-radius:12px;
+  border:1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.85);
+  font-size:22px; line-height:60px; text-align:center; user-select:none;
 }
+#mobile-item-controls .mic-rot-wrap{ display:flex; gap:10px; }
+#mobile-item-controls .mic-rot{ width:60px; height:60px; }
+#mobile-item-controls .mic-step{ width:80px; font-size:14px; }
 
-#mobile-item-controls .mic-rot-wrap{
-  display:flex; gap:10px;
-}
-
-#mobile-item-controls .mic-rot{
-  width:60px; height:60px;
-}
-
-#mobile-item-controls .mic-step{
-  width:80px;
-  font-size:14px;
-}
-
-/* Show controls only on small screens */
+/* Show arrows only on small screens */
 @media (max-width: 768px){
   #mobile-item-controls{ display:block; }
 }
 
-/* Important: prevent browser gestures over the canvas */
-#viewer canvas { touch-action: none; }
+/* ====== Off-canvas responsive sidebar ====== */
+#sidebar-backdrop{
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.35); z-index:2000;
+}
+
+/* Desktop/tablet keep normal grid */
+@media (min-width: 768px){
+  #sidebar{ position:static; transform:none !important; box-shadow:none !important; }
+  #sidebar-backdrop{ display:none !important; }
+}
+
+/* Phones: slide-in drawer */
+@media (max-width: 767px){
+  .main-row{ height:auto; }
+  #sidebar{
+    position:fixed; top:0; bottom:0; left:0;
+    width:82vw; max-width:320px;
+    background:#fff;
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    z-index:2002;
+    box-shadow: 2px 0 18px rgba(0,0,0,.18);
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+  }
+  #sidebar.open{ transform:translateX(0); }
+  #sidebar-backdrop.active{ display:block; }
+  .main{ width:100%; }
+  #add-items{ height:100vh; }
+}
+
+/* Lock body when drawer open */
+body.sidebar-open{ overflow:hidden; }
+
+/* Tappable nav on phones */
+@media (max-width: 767px){
+  .nav-sidebar>li>a{ padding:12px 20px; }
+}

@@ -1,4 +1,4 @@
-/* example.js — mobile drag + on-screen arrows + robust render for old Blueprint3D */
+/* example.js — mobile drag + on-screen arrows + robust render + responsive sidebar */
 
 (function () {
   'use strict';
@@ -138,7 +138,6 @@
     var activeItem = null;
     var holdTimer = null;
 
-    // Always visible on small screens (CSS); we just track selection
     if (three.itemSelectedCallbacks && three.itemSelectedCallbacks.add){
       three.itemSelectedCallbacks.add(function(item){ activeItem = item || null; });
     }
@@ -341,7 +340,6 @@
   var SideMenu = function(blueprint3d, floorplanControls){
     var ACTIVE='active';
     var tabs={ FLOOPLAN:$('#floorplan_tab'), SHOP:$('#items_tab'), DESIGN:$('#design_tab') };
-    // typo corrected: FLOOPLAN -> but we won't use it directly
     tabs = { FLOORPLAN: $('#floorplan_tab'), SHOP: $('#items_tab'), DESIGN: $('#design_tab') };
 
     var scope=this; this.stateChangeCallbacks=$.Callbacks();
@@ -420,8 +418,12 @@
 
     function initLeftMenu(){ $(window).resize(handleResize); handleResize(); }
     function handleResize(){
-      $('.sidebar').height(window.innerHeight);
-      $('#add-items').height(window.innerHeight);
+      var isMobile = window.innerWidth < 768;
+      if (!isMobile){
+        $('.sidebar, #add-items').height(window.innerHeight);
+      } else {
+        $('.sidebar, #add-items').css('height',''); // let CSS control height on phones
+      }
       if (current===scope.states.DEFAULT){
         setTimeout(function(){
           blueprint3d.three.updateWindowSize && blueprint3d.three.updateWindowSize();
@@ -541,6 +543,35 @@
 
     // Initial simple room
     blueprint3d.model.loadSerialized('{"floorplan":{"corners":{"f90da5e3-9e0e-eba7-173d-eb0b071e838e":{"x":204.85099999999989,"y":289.052},"da026c08-d76a-a944-8e7b-096b752da9ed":{"x":672.2109999999999,"y":289.052},"4e3d65cb-54c0-0681-28bf-bddcc7bdb571":{"x":672.2109999999999,"y":-178.308},"71d4f128-ae80-3d58-9bd2-711c6ce6cdf2":{"x":204.85099999999989,"y":-178.308}},"walls":[{"corner1":"71d4f128-ae80-3d58-9bd2-711c6ce6cdf2","corner2":"f90da5e3-9e0e-eba7-173d-eb0b071e838e","frontTexture":{"url":"rooms/textures/wallmap.png","stretch":true,"scale":0},"backTexture":{"url":"rooms/textures/wallmap.png","stretch":true,"scale":0}},{"corner1":"f90da5e3-9e0e-eba7-173d-eb0b071e838e","corner2":"da026c08-d76a-a944-8e7b-096b752da9ed","frontTexture":{"url":"rooms/textures/wallmap.png","stretch":true,"scale":0},"backTexture":{"url":"rooms/textures/wallmap.png","stretch":true,"scale":0}},{"corner1":"da026c08-d76a-a944-8e7b-096b752da9ed","corner2":"4e3d65cb-54c0-0681-28bf-bddcc7bdb571","frontTexture":{"url":"rooms/textures/wallmap.png","stretch":true,"scale":0},"backTexture":{"url":"rooms/textures/wallmap.png","stretch":true,"scale":0}},{"corner1":"4e3d65cb-54c0-0681-28bf-bddcc7bdb571","corner2":"71d4f128-ae80-3d58-9bd2-711c6ce6cdf2","frontTexture":{"url":"rooms/textures/wallmap.png","stretch":true,"scale":0},"backTexture":{"url":"rooms/textures/wallmap.png","stretch":true,"scale":0}}],"wallTextures":[],"floorTextures":{},"newFloorTextures":{}},"items":[]}');
+
+
+    /* ===== Off-canvas sidebar controller ===== */
+    (function(){
+      var $sidebar   = $('#sidebar');
+      var $backdrop  = $('#sidebar-backdrop');
+      var $toggleBtn = $('#sidebar-toggle');
+
+      function openSidebar(){
+        $('body').addClass('sidebar-open');
+        $sidebar.addClass('open');
+        $backdrop.addClass('active').removeClass('hidden-xs');
+      }
+      function closeSidebar(){
+        $('body').removeClass('sidebar-open');
+        $sidebar.removeClass('open');
+        $backdrop.removeClass('active').addClass('hidden-xs');
+      }
+      function toggleSidebar(e){ e && e.preventDefault(); $sidebar.hasClass('open') ? closeSidebar() : openSidebar(); }
+
+      $toggleBtn.on('click', toggleSidebar);
+      $backdrop.on('click', closeSidebar);
+      $('.nav-sidebar a').on('click', closeSidebar);
+
+      $(window).on('resize', function(){
+        if (window.innerWidth >= 768) closeSidebar();
+      });
+    })();
+
   });
 
 })();

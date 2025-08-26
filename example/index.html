@@ -2,10 +2,10 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Blueprint 3D - Example</title>
+    <title>Blueprint 3D - Example (Responsive Sidebar)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Bootstrap + your existing styles (keep if you have them) -->
+    <!-- Bootstrap + your existing styles -->
     <link href="css/bootstrap.css" rel="stylesheet">
     <link href="css/example.css" rel="stylesheet">
 
@@ -22,75 +22,21 @@
 
     <script src="js/items.js"></script>
     <script src="js/pdfexport.js"></script>
-
-    <!-- Minimal hardening/overrides so arrows are visible and clickable -->
-    <style>
-      html, body { height:100%; overflow:hidden; margin:0; }
-      .main-row { padding:0; }
-      .sidebar { padding:20px; overflow:auto; border-right:1px solid #eee; }
-      .main { padding:0; }
-
-      /* Tabs initial visibility: 2D visible first */
-      #viewer { display:none; position:relative; }
-      #floorplanner { display:block; }
-      #add-items { display:none; padding:20px; overflow:auto; }
-
-      /* Controls overlays should not block canvas drags, except the buttons themselves */
-      #camera-controls, #main-controls { pointer-events:none; }
-      #camera-controls .btn, #main-controls .btn { pointer-events:auto; }
-
-      /* WebGL canvas: disable browser gestures on touch devices */
-      #viewer canvas { touch-action:none; }
-
-      /* Bottom-right camera buttons */
-      #camera-controls {
-        position:absolute; bottom:20px; right:0; padding:0 20px; text-align:right; z-index:20;
-      }
-      #main-controls {
-        position:absolute; top:20px; left:20px; z-index:20;
-      }
-
-      /* Loading overlay */
-      #loading-modal {
-        position:absolute; inset:0; background:rgba(50,50,50,.9); display:none; z-index:30;
-      }
-      #loading-modal h1 { color:#fff; text-align:center; margin-top:30%; }
-
-      /* === Mobile Item Controls (always visible on small screens) === */
-      #mobile-item-controls {
-        position:absolute; left:12px; bottom:12px;
-        z-index:40; pointer-events:auto;
-      }
-      #mobile-item-controls .mic-grid{
-        display:grid;
-        grid-template-columns:60px 80px 60px;
-        grid-template-rows:60px 60px;
-        gap:10px; align-items:center; justify-items:center;
-        background:rgba(0,0,0,0.35);
-        -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
-        border-radius:14px; padding:10px;
-      }
-      #mobile-item-controls .mic-btn{
-        width:60px; height:60px; border-radius:12px;
-        border:1px solid rgba(255,255,255,0.25);
-        background:rgba(255,255,255,0.95);
-        font-size:22px; line-height:60px; text-align:center; user-select:none;
-      }
-      #mobile-item-controls .mic-rot-wrap{ display:flex; gap:10px; }
-      #mobile-item-controls .mic-step{ width:80px; font-size:14px; }
-
-      /* Only show arrows on small screens. To force show on desktop, remove this block. */
-      @media (min-width: 769px){
-        #mobile-item-controls { display:none; }
-      }
-    </style>
   </head>
 
   <body>
+    <!-- Mobile: hamburger + backdrop for off-canvas sidebar -->
+    <button id="sidebar-toggle"
+            class="btn btn-primary btn-sm visible-xs-inline-block"
+            style="position:fixed;top:10px;left:10px;z-index:2001">
+      <span class="glyphicon glyphicon-menu-hamburger"></span>
+    </button>
+    <div id="sidebar-backdrop" class="hidden-xs"></div>
+
     <div class="container-fluid">
       <div class="row main-row">
-        <!-- Left Column -->
-        <div class="col-xs-3 sidebar">
+        <!-- Left Column (responsive / off-canvas on phones) -->
+        <div id="sidebar" class="col-xs-12 col-sm-4 col-md-3 sidebar">
           <!-- Main Navigation -->
           <ul class="nav nav-sidebar">
             <li id="floorplan_tab" class="active">
@@ -199,7 +145,7 @@
         </div>
 
         <!-- Right Column -->
-        <div class="col-xs-9 main">
+        <div class="col-xs-12 col-sm-8 col-md-9 main">
 
           <!-- 3D Viewer -->
           <div id="viewer">
