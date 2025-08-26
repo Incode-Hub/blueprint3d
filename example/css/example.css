@@ -47,24 +47,13 @@ div { margin: 0; padding: 0; }
   background-color: rgba(0,0,0,0.50); color: #fff; padding: 5px 10px; z-index: 10; display: none;
 }
 
-/* File input styling */
+/* File input styling & cards */
 .add-item { cursor: pointer; transition: all .3s ease !important; border-radius:8px !important; overflow:hidden; background:#fff; position:relative; }
 .btn-file { display:inline-block; cursor:pointer; position:relative; overflow:hidden; }
 .btn-file input[type=file] { position:absolute; top:0; right:0; min-width:100%; min-height:100%; opacity:0; cursor:inherit; display:block; }
-
-/* Item thumbnail enhancements */
 .add-item:hover { transform: translateY(-5px) scale(1.02) !important; box-shadow:0 8px 25px rgba(0,0,0,0.15) !important; border-color:#337ab7 !important; text-decoration:none !important; }
 .add-item img { transition: all .3s ease; border-radius:4px; }
 .add-item:hover img { transform: scale(1.1); }
-
-/* Category folder/headers (optional) */
-.category-folder { transition: all .3s ease !important; cursor:pointer; border-radius:8px !important; background:#fff; position:relative; overflow:hidden; }
-.category-folder:hover { border-color:#337ab7 !important; box-shadow:0 4px 15px rgba(51,122,183,.2) !important; transform: translateY(-3px) !important; text-decoration:none !important; }
-.category-folder:before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background: linear-gradient(90deg,#337ab7,#5bc0de); transform: scaleX(0); transition: transform .3s ease; }
-.category-folder:hover:before { transform: scaleX(1); }
-.category-header { background: linear-gradient(135deg,#f8f9fa,#e9ecef); border-radius:8px; padding:15px; margin-bottom:20px; border:1px solid #dee2e6; }
-.category-breadcrumb { background:none; padding:0; margin:0 0 20px 0; font-size:14px; }
-.category-breadcrumb > li + li:before { content: "→"; color:#999; padding: 0 8px; }
 
 /* Do not block drags except on buttons */
 #camera-controls, #main-controls { pointer-events: none; }
@@ -137,10 +126,8 @@ body.sidebar-open{ overflow:hidden; }
   .nav-sidebar>li>a{ padding:12px 20px; }
 }
 
-
 /* ===== Fix overlap: compact camera controls on mobile ===== */
 @media (max-width: 768px){
-  /* stack zoom/home vertically at bottom-right */
   #camera-controls{
     right:12px !important;
     bottom:12px !important;
@@ -150,7 +137,6 @@ body.sidebar-open{ overflow:hidden; }
     gap:8px;
     text-align:right;
   }
-  /* hide panning arrows on mobile to avoid clashing with item arrows */
   #camera-controls .btn-group-vertical,
   #move-left, #move-right, #move-up, #move-down{ display:none !important; }
 }
@@ -160,11 +146,28 @@ body.sidebar-open{ overflow:hidden; }
   #mobile-item-controls .mic-grid{
     grid-template-columns:48px 64px 48px;
     grid-template-rows:48px 48px;
-    gap:8px;
-    padding:8px;
+    gap:8px; padding:8px;
   }
-  #mobile-item-controls .mic-btn{
-    width:48px; height:48px; line-height:48px; font-size:18px;
-  }
+  #mobile-item-controls .mic-btn{ width:48px; height:48px; line-height:48px; font-size:18px; }
   #mobile-item-controls .mic-step{ width:64px; font-size:12px; }
+}
+
+/* ===== Hamburger vs #main-controls: move hamburger to top-right & nudge controls ===== */
+@supports (top: max(0px)) {
+  :root{
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+  }
+}
+@media (max-width: 767px){
+  #sidebar-toggle{
+    left: auto !important;
+    right: calc(12px + var(--safe-right, 0px)) !important;
+    top: calc(10px + var(--safe-top, 0px)) !important;
+  }
+  #main-controls{
+    top: calc(56px + var(--safe-top, 0px)) !important;
+    left: calc(12px + var(--safe-left, 0px)) !important;
+  }
 }
