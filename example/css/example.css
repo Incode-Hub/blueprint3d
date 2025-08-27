@@ -180,3 +180,10 @@ body.sidebar-open{ overflow:hidden; }
     left: calc(12px + var(--safe-left, 0px)) !important;
   }
 }
+
+@media (max-width: 767px){
+  .done_btn{
+    margin-top: 11px;
+    margin-right: 28px;
+  }
+}

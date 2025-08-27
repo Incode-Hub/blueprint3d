@@ -556,6 +556,7 @@
     var cameraButtons=new CameraButtons(blueprint3d);
     mainControls(blueprint3d);
     var mobileItemControls=new MobileItemControls(blueprint3d);
+    var pdfExporter=new PDFExporter(blueprint3d); // Initialize PDF export functionality
     installMobileGuards(blueprint3d.three);
     enableMobileItemDrag(blueprint3d);
     bindRenderHook(blueprint3d.three);

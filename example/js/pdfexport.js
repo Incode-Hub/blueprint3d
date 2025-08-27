@@ -135,31 +135,28 @@ var PDFExporter = function (blueprint3d) {
 
   // Get thumbnail URL for an item based on its model URL
   this.getThumbnailUrl = function (item) {
-    if (!item || !item.metadata || !item.metadata.modelUrl) {
+    if (!item || !item.metadata) {
       return null;
     }
 
     try {
-      var modelUrl = item.metadata.modelUrl;
-
-      // Extract the model name from the URL
-      var modelName = modelUrl.split("/").pop().replace(".js", "");
-
-      // First try to find a matching thumbnail in the items.js format
-      for (var i = 0; i < items.length; i++) {
-        if (items[i].model === modelName) {
-          if (items[i].image) {
-            return items[i].image;
-          }
-          break;
-        }
+      // First try to use the stored thumbnailUrl from metadata
+      if (item.metadata.thumbnailUrl) {
+        console.log("Using stored thumbnail URL:", item.metadata.thumbnailUrl);
+        return item.metadata.thumbnailUrl;
       }
 
-      // Fallback to constructed path
-      var thumbnailPath = "models/thumbnails/thumbnail_" + modelName + ".png";
+      // Fallback: try to construct from modelUrl
+      if (item.metadata.modelUrl) {
+        var modelUrl = item.metadata.modelUrl;
+        var modelName = modelUrl.split("/").pop().replace(".js", "");
+        var thumbnailPath = "models/thumbnails/thumbnail_" + modelName + ".png";
+        
+        console.log("Fallback thumbnail path:", thumbnailPath);
+        return thumbnailPath;
+      }
 
-      console.log("Thumbnail path:", thumbnailPath);
-      return thumbnailPath;
+      return null;
     } catch (error) {
       console.error("Error getting thumbnail URL:", error);
       return null;
@@ -378,8 +375,8 @@ var PDFExporter = function (blueprint3d) {
     }
   };
 
-  // Export selected items to PDF
-  this.exportSelectedItemsToPDF = function () {
+  // Export all items to PDF (not just selected ones)
+  this.exportAllItemsToPDF = function () {
     if (!this.testPDFLibrary()) {
       alert("Error: jsPDF library not loaded!");
       return;
@@ -390,18 +387,15 @@ var PDFExporter = function (blueprint3d) {
       $("#pdf-loading-modal").show();
       $("#pdf-loading-message").text("Generating Items PDF...");
 
-      // Get selected items
-      var items = blueprint3d.model.scene.getItems();
-      var selectedItems = items.filter(function (item) {
-        return item.selected;
-      });
+      // Get all items (not just selected ones)
+      var allItems = blueprint3d.model.scene.getItems();
 
-      if (selectedItems.length === 0) {
+      if (allItems.length === 0) {
         $("#pdf-loading-modal").hide();
         $("#pdf-status")
           .removeClass("alert-success")
           .addClass("alert-danger")
-          .text("No items selected")
+          .text("No items found in the scene")
           .show();
         setTimeout(function () {
           $("#pdf-status").fadeOut();
@@ -410,8 +404,10 @@ var PDFExporter = function (blueprint3d) {
       }
 
       // Pre-load all thumbnails before generating the PDF
-      var thumbnailsToLoad = selectedItems.length;
+      var thumbnailsToLoad = allItems.length;
       var loadedThumbnails = [];
+      var startTime = Date.now();
+      var maxWaitTime = 10000; // 10 seconds max wait for thumbnails
 
       // Function to generate PDF once all thumbnails are loaded
       function generatePDF() {
@@ -421,123 +417,185 @@ var PDFExporter = function (blueprint3d) {
 
         // Add title
         pdf.setFontSize(18);
-        pdf.text("Selected Items", 105, 15, { align: "center" });
+        pdf.text("Items List", 105, 15, { align: "center" });
 
         var pageHeight = pdf.internal.pageSize.height;
         var pageWidth = pdf.internal.pageSize.width;
         var margin = 20;
-        var imageWidth = pageWidth - margin * 2;
-        var imageHeight = 100;
-        var textHeight = 40;
-        var itemHeight = imageHeight + textHeight;
-        var maxItemsPerPage = Math.floor(
-          (pageHeight - margin * 2) / itemHeight
-        );
+        var thumbnailWidth = 60; // Fixed thumbnail width
+        var thumbnailHeight = 60; // Fixed thumbnail height
+        var textColumn = pageWidth - margin * 2 - thumbnailWidth - 15; // Width for text column
+        var textHeight = 45; // Height for item text info
+        var itemSpacing = 15; // Space between items
+        var titleHeight = 30; // Space for title
+        var itemHeight = Math.max(thumbnailHeight, textHeight) + itemSpacing;
+        var availableHeight = pageHeight - margin * 2 - titleHeight;
+        var maxItemsPerPage = Math.floor(availableHeight / itemHeight);
 
         var currentPage = 1;
-        var yPosition = margin + 20;
+        var yPosition = margin + titleHeight;
 
-        // Process each selected item
-        for (var i = 0; i < selectedItems.length; i++) {
-          var item = selectedItems[i];
+        // Process each item
+        for (var i = 0; i < allItems.length; i++) {
+          var item = allItems[i];
           var thumbnailData = loadedThumbnails[i];
 
           // Check if we need a new page
           if (i > 0 && i % maxItemsPerPage === 0) {
             pdf.addPage();
             currentPage++;
-            yPosition = margin + 20;
+            yPosition = margin + titleHeight;
+            
+            // Add title to new page
+            pdf.setFontSize(18);
+            pdf.text("Items List (continued) - Page " + currentPage, 105, 15, { align: "center" });
           }
 
-          // Add thumbnail image to PDF if available
+          // Add thumbnail image to PDF if available (positioned to the left)
+          var thumbnailX = margin;
+          var thumbnailY = yPosition;
+          var textX = margin + thumbnailWidth + 15; // Text starts after thumbnail + gap
+          var textY = yPosition + 12; // Align text with thumbnail
+          
           if (thumbnailData && thumbnailData.imgData) {
             pdf.addImage(
               thumbnailData.imgData,
               "JPEG",
-              margin,
-              yPosition,
-              imageWidth,
-              imageHeight
+              thumbnailX,
+              thumbnailY,
+              thumbnailWidth,
+              thumbnailHeight
             );
-            yPosition += imageHeight + 10;
           } else {
-            // If no thumbnail, add placeholder text
-            pdf.setFontSize(12);
+            // Add placeholder rectangle for missing thumbnail
+            pdf.setFillColor(240, 240, 240);
+            pdf.rect(thumbnailX, thumbnailY, thumbnailWidth, thumbnailHeight, 'F');
+            
+            // Add "No image" text in placeholder
+            pdf.setFontSize(8);
             pdf.setTextColor(150, 150, 150);
-            pdf.text("No image available", pageWidth / 2, yPosition + 50, {
-              align: "center",
+            pdf.text("No image", thumbnailX + thumbnailWidth/2, thumbnailY + thumbnailHeight/2, {
+              align: "center"
             });
-            yPosition += imageHeight + 10;
             pdf.setTextColor(0, 0, 0);
           }
 
-          // Add item information
+          // Add item information with better formatting (positioned next to thumbnail)
           var metadata = item.metadata;
           var name = metadata.itemName || "Item " + (i + 1);
 
-          // Add item name with larger font
-          pdf.setFontSize(14);
+          // Add item number and name with larger font
+          pdf.setFontSize(12);
           pdf.setTextColor(0, 0, 0);
-          pdf.text(name, margin, yPosition);
-          yPosition += 8;
+          pdf.text((i + 1) + ". " + name, textX, textY);
+          textY += 12;
 
           // Add dimensions with smaller font
-          pdf.setFontSize(12);
-          var dimensions =
-            "Dimensions: " +
-            Math.round(item.getDepth()) +
-            " x " +
-            Math.round(item.getWidth()) +
-            " x " +
-            Math.round(item.getHeight());
-          pdf.text(dimensions, margin, yPosition);
+          pdf.setFontSize(9);
+          pdf.setTextColor(80, 80, 80);
+          // var dimensions =
+          //   "Size: " +
+          //   Math.round(item.getWidth()) + " × " +
+          //   Math.round(item.getDepth()) + " × " +
+          //   Math.round(item.getHeight()) + " cm";
+          // pdf.text(dimensions, textX, textY);
+          textY += 10;
+
+          // Add model info if available
+          if (metadata.modelUrl) {
+            var modelName = metadata.modelUrl.split("/").pop().replace(".js", "");
+            pdf.setFontSize(8);
+            pdf.setTextColor(120, 120, 120);
+            pdf.text("Model: " + modelName, textX, textY);
+            textY += 8;
+          }
+
+          // Add separation line below item
+          var separatorY = yPosition + itemHeight - itemSpacing + 2;
+          pdf.setLineWidth(0.3);
+          pdf.setDrawColor(200, 200, 200);
+          pdf.line(margin, separatorY, pageWidth - margin, separatorY);
 
           // Move to position for next item
-          yPosition += textHeight;
+          yPosition += itemHeight;
         }
 
-        // Save the PDF
-        pdf.save("blueprint3d-selected-items.pdf");
+        // Save the PDF with all items
+        pdf.save("blueprint3d-items-list.pdf");
 
         // Hide loading modal and show success message
         $("#pdf-loading-modal").hide();
         $("#pdf-status")
           .removeClass("alert-danger")
           .addClass("alert-success")
-          .text("Selected items exported successfully!")
+          .text("All items exported successfully! (" + allItems.length + " items)")
           .show();
         setTimeout(function () {
           $("#pdf-status").fadeOut();
         }, 3000);
       }
 
+      // Add timeout fallback
+      setTimeout(function() {
+        if (thumbnailsToLoad > 0) {
+          console.warn("Timeout reached, generating PDF with loaded thumbnails");
+          thumbnailsToLoad = 0;
+          generatePDF();
+        }
+      }, maxWaitTime);
+
+      // If no items need thumbnails, generate PDF immediately  
+      if (allItems.length === 0) {
+        generatePDF();
+        return;
+      }
+
       // Load all thumbnails first
-      selectedItems.forEach(function (item, index) {
+      allItems.forEach(function (item, index) {
         $("#pdf-loading-message").text(
-          "Loading thumbnails: " + (index + 1) + " of " + selectedItems.length
+          "Loading thumbnails: " + (index + 1) + " of " + allItems.length
         );
 
         var thumbnailUrl = scope.getThumbnailUrl(item);
+        
         if (thumbnailUrl) {
           // Create an image element to load the thumbnail
           var img = new Image();
+          
+          // Set CORS to anonymous to allow cross-origin image loading
+          img.crossOrigin = "anonymous";
 
           img.onload = function () {
-            // Create a canvas to draw the image
-            var canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
-            var ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0);
+            try {
+              // Create a canvas to draw the image
+              var canvas = document.createElement("canvas");
+              var maxSize = 200; // Limit size for PDF efficiency
+              var scale = Math.min(maxSize / img.width, maxSize / img.height);
+              
+              canvas.width = img.width * scale;
+              canvas.height = img.height * scale;
+              var ctx = canvas.getContext("2d");
+              
+              // Draw image with scaling
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            // Get the image data
-            var imgData = canvas.toDataURL("image/jpeg", 0.85);
+              // Get the image data
+              var imgData = canvas.toDataURL("image/jpeg", 0.8);
 
-            // Store the loaded thumbnail
-            loadedThumbnails[index] = {
-              imgData: imgData,
-              item: item,
-            };
+              // Store the loaded thumbnail
+              loadedThumbnails[index] = {
+                imgData: imgData,
+                item: item,
+              };
+
+              console.log("Thumbnail loaded for item:", item.metadata.itemName, "Size:", canvas.width + "x" + canvas.height);
+            } catch (error) {
+              console.error("Error processing thumbnail image:", error);
+              loadedThumbnails[index] = {
+                imgData: null,
+                item: item,
+              };
+            }
 
             // Check if all thumbnails are loaded
             thumbnailsToLoad--;
@@ -546,7 +604,7 @@ var PDFExporter = function (blueprint3d) {
             }
           };
 
-          img.onerror = function () {
+          img.onerror = function (error) {
             console.error("Error loading thumbnail:", thumbnailUrl);
             loadedThumbnails[index] = { item: item };
             thumbnailsToLoad--;
@@ -615,8 +673,8 @@ var PDFExporter = function (blueprint3d) {
       scope.export3DViewToPDF();
     });
 
-    $("#export-items-pdf").click(function () {
-      scope.exportSelectedItemsToPDF();
+    $("#export-items-list").click(function () {
+      scope.exportAllItemsToPDF();
     });
 
     $("#clear-selected-items").click(function () {
