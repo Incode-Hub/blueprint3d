@@ -34,6 +34,14 @@ div { margin: 0; padding: 0; }
 #floorplanner { display: block; }
 #add-items { display: none; padding: 20px; overflow-y: auto; }
 
+/* ===== Mobile Touch Support ===== */
+#floorplanner-canvas {
+  touch-action: none; /* Prevent default touch behaviors like scrolling and zooming */
+  -webkit-touch-callout: none; /* Disable callout on long-press */
+  -webkit-user-select: none; /* Disable text selection */
+  user-select: none;
+}
+
 /* ===== Overlay controls ===== */
 #main-controls { position: absolute; top: 20px; left: 20px; padding: 0; }
 #camera-controls { position: absolute; bottom: 20px; right: 0; padding: 0 20px; text-align: right; }

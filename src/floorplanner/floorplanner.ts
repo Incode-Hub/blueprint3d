@@ -97,6 +97,7 @@ module BP3D.Floorplanner {
 
       var scope = this;
 
+      // Mouse events
       this.canvasElement.mousedown(() => {
         scope.mousedown();
       });
@@ -107,6 +108,47 @@ module BP3D.Floorplanner {
         scope.mouseup();
       });
       this.canvasElement.mouseleave(() => {
+        scope.mouseleave();
+      });
+
+      // Touch events for mobile support
+      this.canvasElement.on('touchstart', (event) => {
+        event.preventDefault(); // Prevent scrolling and zooming
+        var originalEvent = event.originalEvent as any;
+        if (originalEvent && originalEvent.touches && originalEvent.touches.length > 0) {
+          var touch = originalEvent.touches[0];
+          var mouseEvent = {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+          };
+          scope.mousemove(mouseEvent); // Update position first
+          scope.mousedown();
+        }
+      });
+
+      this.canvasElement.on('touchmove', (event) => {
+        event.preventDefault(); // Prevent scrolling
+        var originalEvent = event.originalEvent as any;
+        if (originalEvent && originalEvent.touches && originalEvent.touches.length > 0) {
+          var touch = originalEvent.touches[0];
+          var mouseEvent = {
+            clientX: touch.clientX,
+            clientY: touch.clientY
+          };
+          scope.mousemove(mouseEvent);
+        }
+      });
+
+      this.canvasElement.on('touchend', (event) => {
+        event.preventDefault();
+        scope.mouseup();
+        scope.mouseleave();
+      });
+
+      // Handle touch cancel (e.g., when touch is interrupted)
+      this.canvasElement.on('touchcancel', (event) => {
+        event.preventDefault();
+        scope.mouseup();
         scope.mouseleave();
       });
 

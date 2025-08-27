@@ -26,7 +26,8 @@
     "grunt-subgrunt": "^1.2.0",
     "grunt-typedoc": "^0.2.4",
     "grunt-typescript": "^0.8.0",
-    "matchdep": "^1.0.1"
+    "matchdep": "^1.0.1",
+    "puppeteer": "^24.17.0"
   },
   "repository": {
     "type": "git",
