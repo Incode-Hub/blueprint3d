@@ -82,12 +82,12 @@ div { margin: 0; padding: 0; }
   border-radius:14px; padding:10px;
 }
 #mobile-item-controls .mic-btn{
-  width:60px; height:60px; border-radius:12px;
+  width:40px; height:60px; border-radius:12px;
   border:1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.85);
   font-size:22px; line-height:60px; text-align:center; user-select:none;
 }
 #mobile-item-controls .mic-rot-wrap{ display:flex; gap:10px; }
-#mobile-item-controls .mic-rot{ width:60px; height:60px; }
+#mobile-item-controls .mic-rot{ width:40px; height:60px; }
 #mobile-item-controls .mic-step{ width:80px; font-size:14px; }
 
 /* Show arrows only on small screens when item is selected */
