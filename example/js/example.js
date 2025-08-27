@@ -176,12 +176,49 @@
     var holdIntervalMs = 85;
     var activeItem = null;
     var holdTimer = null;
+    
+    // Mobile detection function
+    function isMobile() {
+      return window.innerWidth <= 768;
+    }
+    
+    // Show/hide controls based on item selection and mobile status
+    function updateControlsVisibility() {
+      if (isMobile()) {
+        if (activeItem) {
+          $wrap.addClass('show');
+        } else {
+          $wrap.removeClass('show');
+        }
+      } else {
+        // On desktop, always hide mobile controls
+        $wrap.removeClass('show');
+      }
+    }
+    
+    // Item selection callback
+    function onItemSelected(item) {
+      activeItem = item || null;
+      updateControlsVisibility();
+    }
+    
+    // Item unselection callback
+    function onItemUnselected() {
+      activeItem = null;
+      updateControlsVisibility();
+    }
+    
     if (three.itemSelectedCallbacks && three.itemSelectedCallbacks.add){
-      three.itemSelectedCallbacks.add(function(item){ activeItem = item || null; });
+      three.itemSelectedCallbacks.add(onItemSelected);
     }
     if (three.itemUnselectedCallbacks && three.itemUnselectedCallbacks.add){
-      three.itemUnselectedCallbacks.add(function(){ activeItem = null; });
+      three.itemUnselectedCallbacks.add(onItemUnselected);
     }
+    
+    // Listen for window resize to update visibility on orientation/window size changes
+    $(window).on('resize', function() {
+      updateControlsVisibility();
+    });
     function nudgeItem(dx_cm, dz_cm){
       if (!activeItem) return;
       if (typeof activeItem.move==='function') {
@@ -241,6 +278,9 @@
         $stepBtn.text(moveStepCm + 'cm');
       });
     }
+    
+    // Initialize controls visibility on page load
+    updateControlsVisibility();
   }
   var CameraButtons = function(blueprint3d){
     var three = blueprint3d.three;

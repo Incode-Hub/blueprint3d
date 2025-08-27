@@ -90,9 +90,10 @@ div { margin: 0; padding: 0; }
 #mobile-item-controls .mic-rot{ width:60px; height:60px; }
 #mobile-item-controls .mic-step{ width:80px; font-size:14px; }
 
-/* Show arrows only on small screens */
+/* Show arrows only on small screens when item is selected */
 @media (max-width: 768px){
-  #mobile-item-controls{ display:block; }
+  #mobile-item-controls{ display:none; } /* Hidden by default */
+  #mobile-item-controls.show{ display:block; } /* Show when item is selected */
 }
 
 /* ====== Off-canvas responsive sidebar ====== */
