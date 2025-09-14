@@ -213,8 +213,10 @@
                   if (materials.length === 1) {
                     mat = materials[0];
                   } else {
-                    // For Three.js r69, MultiMaterial should exist
-                    if (typeof THREE.MultiMaterial !== 'undefined') {
+                    // For Three.js r69, use MeshFaceMaterial (not MultiMaterial)
+                    if (typeof THREE.MeshFaceMaterial !== 'undefined') {
+                      mat = new THREE.MeshFaceMaterial(materials);
+                    } else if (typeof THREE.MultiMaterial !== 'undefined') {
                       mat = new THREE.MultiMaterial(materials);
                     } else {
                       // Fallback to first material
