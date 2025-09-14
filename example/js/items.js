@@ -156,6 +156,31 @@ $(document).ready(function() {
       "image" : "models/thumbnails/thumbnail_nyc2.jpg",
       "model" : "models/js/nyc-poster2.js",
       "type" : "2"
+    },
+    // Kepler Bathroom Models
+    {
+      "name" : "Kepler Basin 70 Half Pedestal",
+      "image" : "models/js/Kepler Basin 70 Half Pedestal.png",
+      "model" : "models/js/Kepler Basin 70 Half Pedestal.js",
+      "type" : "1"
+    },
+    {
+      "name" : "Kepler Basin 70 Pedestal",
+      "image" : "models/js/Kepler Basin 70 Pedestal.png",
+      "model" : "models/js/Kepler Basin 70 Pedestal.js",
+      "type" : "1"
+    },
+    {
+      "name" : "Kepler Basin 70",
+      "image" : "models/js/Kepler Basin 70.png",
+      "model" : "models/js/Kepler Basin 70.js",
+      "type" : "1"
+    },
+    {
+      "name" : "Kepler Toilet Floor Standing",
+      "image" : "models/js/Kepler Toilet Floor Standing.png",
+      "model" : "models/js/Kepler Toilet Floor Standing.js",
+      "type" : "1"
     }
   ];
 
@@ -226,6 +251,13 @@ $(document).ready(function() {
         "items": originalItems.filter(function(item) {
           return item.name.indexOf("Rug") !== -1 || 
                  item.name.indexOf("Poster") !== -1;
+        })
+      },
+
+      "Bathroom": {
+        "icon": "glyphicon-tint",
+        "items": originalItems.filter(function(item) {
+          return item.name.indexOf("Kepler") !== -1;
         })
       }
     };

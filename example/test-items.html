@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Add Items - Blueprint3D</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        #console {
+            background: #222;
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            border-radius: 3px;
+        }
+        .console-line {
+            margin: 2px 0;
+        }
+        .console-error {
+            color: #f00;
+        }
+        .console-warn {
+            color: #ff0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Blueprint3D - Add Items Test Page</h1>
+    
+    <div class="test-section">
+        <h2>1. Library Status</h2>
+        <div id="library-status"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Model Loading Tests</h2>
+        <button onclick="testLegacyModel()">Test Legacy JSON Model</button>
+        <button onclick="testKeplerModel()">Test Kepler GLB-in-JS Model</button>
+        <button onclick="testDirectAdd()">Test Direct Scene.addItem</button>
+        <div id="test-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Console Output</h2>
+        <div id="console"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Main Application</h2>
+        <p>Open the main application to test with full UI:</p>
+        <a href="/example/" target="_blank">
+            <button>Open Blueprint3D App →</button>
+        </a>
+    </div>
+
+    <!-- Load libraries -->
+    <script src="js/three.min.js"></script>
+    <script src="js/blueprint3d.js"></script>
+    <script src="js/model-loader-simple.js"></script>
+    <script src="js/jquery.js"></script>
+    
+    <script>
+        // Console capture
+        var consoleDiv = document.getElementById('console');
+        var originalLog = console.log;
+        var originalError = console.error;
+        var originalWarn = console.warn;
+        
+        function addConsoleMessage(type, args) {
+            var line = document.createElement('div');
+            line.className = 'console-line console-' + type;
+            line.textContent = Array.prototype.slice.call(args).join(' ');
+            consoleDiv.appendChild(line);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+        
+        console.log = function() {
+            originalLog.apply(console, arguments);
+            addConsoleMessage('log', arguments);
+        };
+        
+        console.error = function() {
+            originalError.apply(console, arguments);
+            addConsoleMessage('error', arguments);
+        };
+        
+        console.warn = function() {
+            originalWarn.apply(console, arguments);
+            addConsoleMessage('warn', arguments);
+        };
+        
+        // Check library status
+        function checkLibraries() {
+            var status = document.getElementById('library-status');
+            var checks = [
+                { name: 'THREE.js', check: typeof THREE !== 'undefined', version: THREE ? THREE.REVISION : 'N/A' },
+                { name: 'jQuery', check: typeof $ !== 'undefined', version: $ ? $.fn.jquery : 'N/A' },
+                { name: 'Blueprint3D', check: typeof BP3D !== 'undefined' },
+                { name: 'ModelLoader', check: typeof ModelLoader !== 'undefined' },
+                { name: 'JSONLoader', check: typeof THREE !== 'undefined' && typeof THREE.JSONLoader !== 'undefined' },
+                { name: 'Scene.addItem', check: typeof BP3D !== 'undefined' && BP3D.Model && BP3D.Model.Scene && typeof BP3D.Model.Scene.prototype.addItem === 'function' }
+            ];
+            
+            checks.forEach(function(check) {
+                var div = document.createElement('div');
+                div.className = 'status ' + (check.check ? 'success' : 'error');
+                div.textContent = check.name + ': ' + (check.check ? '✓ Loaded' : '✗ Not loaded');
+                if (check.version) {
+                    div.textContent += ' (v' + check.version + ')';
+                }
+                status.appendChild(div);
+            });
+        }
+        
+        // Test functions
+        function testLegacyModel() {
+            console.log('Testing legacy JSON model...');
+            var results = document.getElementById('test-results');
+            
+            if (!ModelLoader) {
+                results.innerHTML = '<div class="status error">ModelLoader not available</div>';
+                return;
+            }
+            
+            ModelLoader.loadModel('models/js/closed-door28x80_baked.js', {
+                onSuccess: function(geometry, materials) {
+                    console.log('Legacy model loaded successfully');
+                    console.log('Geometry vertices:', geometry.vertices ? geometry.vertices.length : 'N/A');
+                    console.log('Materials:', materials ? materials.length : 0);
+                    results.innerHTML = '<div class="status success">✓ Legacy model loaded successfully</div>';
+                },
+                onError: function(error) {
+                    console.error('Failed to load legacy model:', error);
+                    results.innerHTML = '<div class="status error">✗ Failed to load legacy model: ' + error.message + '</div>';
+                },
+                onProgress: function(loaded, total) {
+                    console.log('Loading progress:', Math.round((loaded/total) * 100) + '%');
+                }
+            });
+        }
+        
+        function testKeplerModel() {
+            console.log('Testing Kepler GLB-in-JS model...');
+            var results = document.getElementById('test-results');
+            
+            if (!ModelLoader) {
+                results.innerHTML = '<div class="status error">ModelLoader not available</div>';
+                return;
+            }
+            
+            ModelLoader.loadModel('models/js/Kepler Basin 70.js', {
+                onSuccess: function(geometry, materials) {
+                    console.log('Kepler model loaded (as fallback geometry)');
+                    console.log('Geometry type:', geometry.type || geometry.constructor.name);
+                    console.log('Materials:', materials ? materials.length : 0);
+                    results.innerHTML = '<div class="status info">⚠ Kepler model loaded as placeholder (GLTFLoader not available for Three.js r69)</div>';
+                },
+                onError: function(error) {
+                    console.error('Failed to load Kepler model:', error);
+                    results.innerHTML = '<div class="status error">✗ Failed to load Kepler model: ' + error.message + '</div>';
+                },
+                onProgress: function(loaded, total) {
+                    console.log('Loading progress:', Math.round((loaded/total) * 100) + '%');
+                }
+            });
+        }
+        
+        function testDirectAdd() {
+            console.log('Testing direct Scene.addItem...');
+            var results = document.getElementById('test-results');
+            
+            if (!BP3D || !BP3D.Model || !BP3D.Model.Scene) {
+                results.innerHTML = '<div class="status error">Blueprint3D Scene not available</div>';
+                return;
+            }
+            
+            // Create a mock scene
+            try {
+                console.log('Scene.addItem function exists:', typeof BP3D.Model.Scene.prototype.addItem === 'function');
+                results.innerHTML = '<div class="status success">✓ Scene.addItem is available and patched</div>';
+            } catch (error) {
+                console.error('Error checking Scene.addItem:', error);
+                results.innerHTML = '<div class="status error">✗ Error: ' + error.message + '</div>';
+            }
+        }
+        
+        // Initialize on load
+        window.addEventListener('load', function() {
+            checkLibraries();
+            console.log('Test page loaded and ready');
+            console.log('Scene.addItem patch status:', window.ModelLoader ? 'Patched for Kepler models' : 'Not patched');
+        });
+    </script>
+</body>
+</html>
