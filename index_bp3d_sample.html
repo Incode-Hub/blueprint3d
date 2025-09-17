@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Blueprint3D - Kepler Toilet Demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link href="example/css/example.css" rel="stylesheet">
+
+  <!-- Use existing example setup -->
+  <script src="example/js/three.min.js"></script>
+  <script src="dist/blueprint3d.js"></script>
+
+  <!-- Universal loader from example -->
+  <script src="example/js/model-loader.js"></script>
+  <script src="example/js/scene-patch.js"></script>
+
+  <script src="example/js/jquery.js"></script>
+  <script src="example/js/bootstrap.js"></script>
+
+  <!-- Optional: PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Load existing example system -->
+  <script src="example/js/example.js"></script>
+
+  <!-- Kepler Items -->
+  <script src="items_kepler.js"></script>
+</head>
+
+<body>
+  <!-- Mobile: hamburger + backdrop for off-canvas sidebar -->
+  <button id="sidebar-toggle"
+          class="btn btn-primary btn-sm visible-xs-inline-block"
+          style="position:fixed;top:10px;left:10px;z-index:2001">
+    <span class="glyphicon glyphicon-menu-hamburger"></span>
+  </button>
+  <div id="sidebar-backdrop" class="hidden-xs"></div>
+
+  <div class="container-fluid">
+    <div class="row main-row">
+      <!-- Left Column (responsive / off-canvas on phones) -->
+      <div id="sidebar" class="col-xs-12 col-sm-4 col-md-3 sidebar">
+        <!-- Main Navigation -->
+        <ul class="nav nav-sidebar">
+          <li id="floorplan_tab">
+            <a href="#">Edit Floorplan <span class="glyphicon glyphicon-chevron-right pull-right"></span></a>
+          </li>
+          <li id="design_tab" class="active">
+            <a href="#">Design <span class="glyphicon glyphicon-chevron-right pull-right"></span></a>
+          </li>
+          <li id="items_tab">
+            <a href="#">Add Items <span class="glyphicon glyphicon-chevron-right pull-right"></span></a>
+          </li>
+        </ul>
+        <hr />
+
+        <!-- Context Menu -->
+        <div id="context-menu" style="display:none;">
+          <div style="margin: 0 20px">
+            <span id="context-menu-name" class="lead"></span>
+            <br /><br />
+            <button class="btn btn-block btn-danger" id="context-menu-delete">
+              <span class="glyphicon glyphicon-trash"></span> Delete Item
+            </button>
+            <br /><br />
+          </div>
+        </div>
+
+        <!-- Floor textures -->
+        <div id="floorTexturesDiv" style="display:none; padding: 0 20px">
+          <div class="panel panel-default">
+            <div class="panel-heading">Adjust Floor</div>
+            <div class="panel-body" style="color:#333;">
+              <div class="col-sm-6" style="padding:3px">
+                <a href="#" class="thumbnail texture-select-thumbnail"
+                   texture-url="rooms/textures/light_fine_wood.jpg" texture-stretch="false" texture-scale="300">
+                  <img alt="Thumb light fine wood" src="rooms/thumbnails/thumbnail_light_fine_wood.jpg" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wall textures -->
+        <div id="wallTextures" style="display:none; padding: 0 20px">
+          <div class="panel panel-default">
+            <div class="panel-heading">Adjust Wall</div>
+            <div class="panel-body" style="color:#333;">
+              <div class="col-sm-6" style="padding:3px">
+                <a href="#" class="thumbnail texture-select-thumbnail"
+                   texture-url="rooms/textures/marbletiles.jpg" texture-stretch="false" texture-scale="300">
+                  <img alt="Thumb marbletiles" src="rooms/thumbnails/thumbnail_marbletiles.jpg" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="col-xs-12 col-sm-8 col-md-9 main">
+
+        <!-- 3D Viewer -->
+        <div id="viewer">
+          <!-- Top-left file actions -->
+          <div id="main-controls">
+            <a href="#" class="btn btn-default btn-sm" id="new">New Plan</a>
+            <a href="#" class="btn btn-default btn-sm" id="saveFile">Save Plan</a>
+            <a class="btn btn-sm btn-default btn-file">
+              <input type="file" class="hidden-input" id="loadFile"> Load Plan
+            </a>
+          </div>
+
+          <!-- Bottom-right camera buttons -->
+          <div id="camera-controls">
+            <a href="#" class="btn btn-default bottom" id="zoom-out">
+              <span class="glyphicon glyphicon-zoom-out"></span>
+            </a>
+            <a href="#" class="btn btn-default bottom" id="reset-view">
+              <span class="glyphicon glyphicon-home"></span>
+            </a>
+            <a href="#" class="btn btn-default bottom" id="zoom-in">
+              <span class="glyphicon glyphicon-zoom-in"></span>
+            </a>
+          </div>
+
+          <!-- Loading overlay -->
+          <div id="loading-modal"><h1>Loading...</h1></div>
+        </div>
+
+        <!-- 2D Floorplanner -->
+        <div id="floorplanner">
+          <canvas id="floorplanner-canvas"></canvas>
+          <div id="floorplanner-controls" style="position:absolute; left:0; top:0; margin:20px 0; padding:0 20px; width:100%;">
+            <button id="move" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-move"></span> Move Walls</button>
+            <button id="draw" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-pencil"></span> Draw Walls</button>
+            <button id="delete" class="btn btn-sm btn-default"><span class="glyphicon glyphicon-remove"></span> Delete Walls</button>
+            <span class="pull-right"><button class="btn btn-primary btn-sm done_btn" id="update-floorplan">Done &raquo;</button></span>
+          </div>
+        </div>
+
+        <!-- Add Items -->
+        <div id="add-items">
+          <div class="row" id="items-wrapper">
+            <!-- Kepler items will be injected here by items_kepler.js -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- example.js will handle all Blueprint3D initialization -->
+</body>
+</html>
