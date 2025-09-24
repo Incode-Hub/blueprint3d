@@ -4,7 +4,7 @@ module.exports = function (grunt) {
 
   var globalConfig = {
     moduleName: "blueprint3d",
-    sources: ["src/*.ts", "src/*/*.ts"],
+    sources: ["src/*.ts", "src/*/*.ts", "src/*/*/*.ts"],
     outDir: "dist",
     docDir: "doc",
     exampleDir: "example/js/"
@@ -23,6 +23,11 @@ module.exports = function (grunt) {
   configuration.copy.threejs = {
     src: "node_modules/three/three.min.js",
     dest: globalConfig.exampleDir + "/three.min.js"
+  }
+
+  configuration.copy.gltfloader = {
+    src: "example/vendor/GLTFLoader.js",
+    dest: globalConfig.exampleDir + "/../vendor/GLTFLoader.js"
   }
 
   configuration.typescript = {
@@ -74,6 +79,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask("example", [
     "copy:threejs",
+    "copy:gltfloader",
     "copy:" + globalConfig.moduleName
   ]);
 

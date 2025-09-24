@@ -273,6 +273,11 @@ module BP3D.Three {
       geometry.faces.push(new THREE.Face3(0, 1, 2));
       geometry.faces.push(new THREE.Face3(0, 2, 3));
 
+      // Ensure geometry is properly updated
+      geometry.computeFaceNormals();
+      geometry.computeVertexNormals();
+      geometry.verticesNeedUpdate = true;
+
       var fillerMaterial = new THREE.MeshBasicMaterial({
         color: color,
         side: THREE.DoubleSide

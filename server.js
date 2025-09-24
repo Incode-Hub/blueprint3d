@@ -15,11 +15,13 @@ const mimeTypes = {
   '.woff': 'font/woff',
   '.woff2': 'font/woff2',
   '.ttf': 'font/ttf',
-  '.eot': 'font/eot'
+  '.eot': 'font/eot',
+  '.gltf': 'model/gltf+json',
+  '.glb': 'model/gltf-binary'
 };
 
 const server = http.createServer((req, res) => {
-  let filePath = '.' + req.url;
+  let filePath = '.' + decodeURIComponent(req.url);
   if (filePath === './') {
     filePath = './example/index.html';
   }

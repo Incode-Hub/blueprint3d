@@ -111,7 +111,9 @@ module BP3D.Model {
       geometry.faces.push(new THREE.Face3(0, 1, 2));
       geometry.faces.push(new THREE.Face3(0, 2, 3));
       geometry.computeFaceNormals();
+      geometry.computeVertexNormals();
       geometry.computeBoundingBox();
+      geometry.verticesNeedUpdate = true;
 
       this.plane = new THREE.Mesh(geometry,
         new THREE.MeshBasicMaterial());

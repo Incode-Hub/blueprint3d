@@ -47,10 +47,12 @@ module BP3D.Three {
     function itemSelected(item) {
       if (selectedItem != item) {
         resetSelectedItem();
-        if (item.allowRotate && !item.fixed) {
+        if (item && item.allowRotate && !item.fixed && item.halfSize) {
           selectedItem = item;
           activeObject = makeObject(selectedItem);
-          scene.add(activeObject);
+          if (activeObject) {
+            scene.add(activeObject);
+          }
         }
       }
     }
@@ -98,12 +100,20 @@ module BP3D.Three {
         rotateVector(item)
       );
 
+      // Ensure geometry is properly updated for Three.js v0.69
+      geometry.verticesNeedUpdate = true;
+      geometry.computeBoundingSphere();
+
       return geometry;
     }
 
     function rotateVector(item) {
-      var vec = new THREE.Vector3(0, 0,
-        Math.max(item.halfSize.x, item.halfSize.z) + 1.4 + distance);
+      // Safety check for item properties
+      var maxHalfSize = 1;
+      if (item && item.halfSize) {
+        maxHalfSize = Math.max(item.halfSize.x || 1, item.halfSize.z || 1);
+      }
+      var vec = new THREE.Vector3(0, 0, maxHalfSize + 1.4 + distance);
       return vec;
     }
 
@@ -138,25 +148,34 @@ module BP3D.Three {
     }
 
     function makeObject(item) {
+      if (!item || !item.halfSize) {
+        return null;
+      }
+
       var object = new THREE.Object3D();
-      var line = new THREE.Line(
-        makeLineGeometry(item),
-        makeLineMaterial(scope.rotating),
-        THREE.LinePieces);
 
-      var cone = makeCone(item);
-      var sphere = makeSphere(item);
+      try {
+        var lineGeometry = makeLineGeometry(item);
+        var lineMaterial = makeLineMaterial(scope.rotating);
+        var line = new THREE.Line(lineGeometry, lineMaterial);
 
-      object.add(line);
-      object.add(cone);
-      object.add(sphere);
+        var cone = makeCone(item);
+        var sphere = makeSphere(item);
 
-      object.rotation.y = item.rotation.y;
-      object.position.x = item.position.x;
-      object.position.z = item.position.z;
-      object.position.y = height;
+        object.add(line);
+        object.add(cone);
+        object.add(sphere);
 
-      return object;
+        object.rotation.y = item.rotation ? item.rotation.y || 0 : 0;
+        object.position.x = item.position ? item.position.x || 0 : 0;
+        object.position.z = item.position ? item.position.z || 0 : 0;
+        object.position.y = height;
+
+        return object;
+      } catch (error) {
+        console.error('Error creating HUD object:', error);
+        return null;
+      }
     }
 
     init();

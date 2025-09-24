@@ -157,30 +157,72 @@ $(document).ready(function() {
       "model" : "models/js/nyc-poster2.js",
       "type" : "2"
     },
-    // Kepler Bathroom Models
+    // Kepler Bathroom Models (JS format)
     {
-      "name" : "Kepler Basin 70 Half Pedestal",
+      "name" : "Kepler Basin 70 Half Pedestal (JS)",
       "image" : "models/js/Kepler Basin 70 Half Pedestal.png",
       "model" : "models/js/Kepler Basin 70 Half Pedestal.js",
-      "type" : "1"
+      "type" : "1",
+      "format" : "js"
     },
     {
-      "name" : "Kepler Basin 70 Pedestal",
+      "name" : "Kepler Basin 70 Pedestal (JS)",
       "image" : "models/js/Kepler Basin 70 Pedestal.png",
       "model" : "models/js/Kepler Basin 70 Pedestal.js",
-      "type" : "1"
+      "type" : "1",
+      "format" : "js"
     },
     {
-      "name" : "Kepler Basin 70",
+      "name" : "Kepler Basin 70 (JS)",
       "image" : "models/js/Kepler Basin 70.png",
       "model" : "models/js/Kepler Basin 70.js",
-      "type" : "1"
+      "type" : "1",
+      "format" : "js"
     },
     {
-      "name" : "Kepler Toilet Floor Standing",
+      "name" : "Kepler Toilet Floor Standing (JS)",
       "image" : "models/js/Kepler Toilet Floor Standing.png",
       "model" : "models/js/Kepler Toilet Floor Standing.js",
-      "type" : "1"
+      "type" : "1",
+      "format" : "js"
+    },
+    // Kepler Bathroom Models (GLTF format)
+    {
+      "name" : "Kepler Basin 70 Half Pedestal (GLTF)",
+      "image" : "models/js/Kepler Basin 70 Half Pedestal.png",
+      "model" : "gltf/Kepler Basin 70 Half Pedestal.gltf",
+      "type" : "1",
+      "format" : "gltf"
+    },
+    {
+      "name" : "Kepler Basin 70 Pedestal (GLTF)",
+      "image" : "models/js/Kepler Basin 70 Pedestal.png",
+      "model" : "gltf/Kepler Basin 70 Pedestal.gltf",
+      "type" : "1",
+      "format" : "gltf"
+    },
+    {
+      "name" : "Kepler Basin 70 (GLTF)",
+      "image" : "models/js/Kepler Basin 70.png",
+      "model" : "gltf/Kepler Basin 70.gltf",
+      "type" : "1",
+      "format" : "gltf"
+    },
+    {
+      "name" : "Kepler Toilet Floor Standing (GLTF)",
+      "image" : "models/js/Kepler Toilet Floor Standing.png",
+      "model" : "gltf/Kepler Toilet Floor Standing.gltf",
+      "type" : "1",
+      "format" : "gltf"
+    },
+    // Sample GLTF item for testing
+    {
+      "name" : "Sample Box (GLTF)",
+      "image" : "models/thumbnails/thumbnail_cb-blue-block60x96.png",
+      "model" : "models/sample-box.gltf",
+      "type" : "1",
+      "format" : "gltf",
+      "height" : 12
     }
   ];
 
@@ -188,75 +230,83 @@ $(document).ready(function() {
   var currentCategory = null;
 
   // Create categories by filtering original items
-  function createCategories() {
+  function createCategories(formatFilter) {
+    formatFilter = formatFilter || 'all';
+
+    // Filter items by format first
+    var filteredItems = originalItems.filter(function(item) {
+      if (formatFilter === 'all') return true;
+      return item.format === formatFilter || !item.format; // include items without format specified
+    });
+
     return {
       "Furniture": {
         "icon": "glyphicon-bed",
-        "items": originalItems.filter(function(item) {
-          return item.name.indexOf("Chair") !== -1 || 
-                 item.name.indexOf("Sofa") !== -1 || 
+        "items": filteredItems.filter(function(item) {
+          return item.name.indexOf("Chair") !== -1 ||
+                 item.name.indexOf("Sofa") !== -1 ||
                  item.name.indexOf("Sectional") !== -1;
         })
       },
-      
+
       "Storage": {
         "icon": "glyphicon-folder-close",
-        "items": originalItems.filter(function(item) {
-          return item.name.indexOf("Dresser") !== -1 || 
-                 item.name.indexOf("Wardrobe") !== -1 || 
-                 item.name.indexOf("Bookshelf") !== -1 || 
+        "items": filteredItems.filter(function(item) {
+          return item.name.indexOf("Dresser") !== -1 ||
+                 item.name.indexOf("Wardrobe") !== -1 ||
+                 item.name.indexOf("Bookshelf") !== -1 ||
                  item.name.indexOf("Trunk") !== -1;
         })
       },
-      
+
       "Tables": {
         "icon": "glyphicon-th-large",
-        "items": originalItems.filter(function(item) {
-          return item.name.indexOf("table") !== -1 || 
+        "items": filteredItems.filter(function(item) {
+          return item.name.indexOf("table") !== -1 ||
                  item.name.indexOf("Table") !== -1;
         })
       },
 
       "Bedroom": {
         "icon": "glyphicon-home",
-        "items": originalItems.filter(function(item) {
+        "items": filteredItems.filter(function(item) {
           return item.name.indexOf("Bed") !== -1;
         })
       },
 
       "Electronics": {
         "icon": "glyphicon-blackboard",
-        "items": originalItems.filter(function(item) {
+        "items": filteredItems.filter(function(item) {
           return item.name.indexOf("Media Console") !== -1;
         })
       },
 
       "Lighting": {
         "icon": "glyphicon-flash",
-        "items": originalItems.filter(function(item) {
+        "items": filteredItems.filter(function(item) {
           return item.name.indexOf("Lamp") !== -1;
         })
       },
 
       "Doors & Windows": {
         "icon": "glyphicon-log-in",
-        "items": originalItems.filter(function(item) {
-          return item.name.indexOf("Door") !== -1 || 
+        "items": filteredItems.filter(function(item) {
+          return item.name.indexOf("Door") !== -1 ||
                  item.name.indexOf("Window") !== -1;
         })
       },
 
       "Decorative": {
         "icon": "glyphicon-picture",
-        "items": originalItems.filter(function(item) {
-          return item.name.indexOf("Rug") !== -1 || 
+        "items": filteredItems.filter(function(item) {
+          return item.name.indexOf("Rug") !== -1 ||
                  item.name.indexOf("Poster") !== -1;
         })
       },
 
       "Bathroom": {
         "icon": "glyphicon-tint",
-        "items": originalItems.filter(function(item) {
+        "items": filteredItems.filter(function(item) {
           return item.name.indexOf("Kepler") !== -1;
         })
       }
@@ -286,18 +336,33 @@ $(document).ready(function() {
   }
 
   // Function to show categories (main view)
-  function showCategories() {
-    var itemCategories = createCategories();
+  function showCategories(formatFilter) {
+    formatFilter = formatFilter || 'all';
+    var itemCategories = createCategories(formatFilter);
     itemsDiv.empty();
     currentCategory = null;
     
-    // Add header with toggle button
+    // Add header with toggle button and format selector
     var headerHtml = '<div class="col-xs-12" style="margin-bottom: 20px;">' +
                       '<div class="row">' +
-                        '<div class="col-xs-8">' +
+                        '<div class="col-xs-6">' +
                           '<h4 class="text-center" style="margin: 5px 0; color: #666;">Select a Category</h4>' +
                         '</div>' +
-                        '<div class="col-xs-4 text-right">' +
+                        '<div class="col-xs-3 text-center">' +
+                          '<label style="font-size: 12px; margin: 0;">Model Format:</label><br>' +
+                          '<div class="btn-group btn-group-xs" data-toggle="buttons">' +
+                            '<label class="btn btn-default ' + (formatFilter === 'all' ? 'active' : '') + '" id="format-all">' +
+                              '<input type="radio" name="format" value="all" ' + (formatFilter === 'all' ? 'checked' : '') + '> All' +
+                            '</label>' +
+                            '<label class="btn btn-default ' + (formatFilter === 'js' ? 'active' : '') + '" id="format-js">' +
+                              '<input type="radio" name="format" value="js" ' + (formatFilter === 'js' ? 'checked' : '') + '> JS' +
+                            '</label>' +
+                            '<label class="btn btn-default ' + (formatFilter === 'gltf' ? 'active' : '') + '" id="format-gltf">' +
+                              '<input type="radio" name="format" value="gltf" ' + (formatFilter === 'gltf' ? 'checked' : '') + '> GLTF' +
+                            '</label>' +
+                          '</div>' +
+                        '</div>' +
+                        '<div class="col-xs-3 text-right">' +
                           '<button class="btn btn-xs btn-default" id="toggle-view">' +
                             '<span class="glyphicon glyphicon-list"></span> List View' +
                           '</button>' +
@@ -345,25 +410,40 @@ $(document).ready(function() {
   }
 
   // Function to show items in a category
-  function showCategoryItems(categoryName) {
-    var itemCategories = createCategories();
+  function showCategoryItems(categoryName, formatFilter) {
+    formatFilter = formatFilter || 'all';
+    var itemCategories = createCategories(formatFilter);
     itemsDiv.empty();
     currentCategory = categoryName;
     
     var category = itemCategories[categoryName];
     
-    // Add header with back button and toggle
+    // Add header with back button, format selector, and toggle
     var headerHtml = '<div class="col-xs-12" style="margin-bottom: 20px;">' +
                       '<div class="row">' +
-                        '<div class="col-xs-3">' +
+                        '<div class="col-xs-2">' +
                           '<button class="btn btn-default btn-sm" id="back-to-categories">' +
                             '<span class="glyphicon glyphicon-arrow-left"></span> Back' +
                           '</button>' +
                         '</div>' +
-                        '<div class="col-xs-6">' +
+                        '<div class="col-xs-4">' +
                           '<h4 class="text-center" style="margin: 5px 0; color: #666;">' +
                             '<span class="glyphicon ' + category.icon + '"></span> ' + categoryName +
                           '</h4>' +
+                        '</div>' +
+                        '<div class="col-xs-3 text-center">' +
+                          '<label style="font-size: 12px; margin: 0;">Model Format:</label><br>' +
+                          '<div class="btn-group btn-group-xs" data-toggle="buttons">' +
+                            '<label class="btn btn-default ' + (formatFilter === 'all' ? 'active' : '') + '" id="format-all">' +
+                              '<input type="radio" name="format" value="all" ' + (formatFilter === 'all' ? 'checked' : '') + '> All' +
+                            '</label>' +
+                            '<label class="btn btn-default ' + (formatFilter === 'js' ? 'active' : '') + '" id="format-js">' +
+                              '<input type="radio" name="format" value="js" ' + (formatFilter === 'js' ? 'checked' : '') + '> JS' +
+                            '</label>' +
+                            '<label class="btn btn-default ' + (formatFilter === 'gltf' ? 'active' : '') + '" id="format-gltf">' +
+                              '<input type="radio" name="format" value="gltf" ' + (formatFilter === 'gltf' ? 'checked' : '') + '> GLTF' +
+                            '</label>' +
+                          '</div>' +
                         '</div>' +
                         '<div class="col-xs-3 text-right">' +
                           '<button class="btn btn-xs btn-default" id="toggle-view">' +
@@ -413,26 +493,44 @@ $(document).ready(function() {
     );
   }
 
+  // Global format filter state
+  var currentFormatFilter = 'all';
+
   // Event handlers
   $(document).on('click', '.category-folder', function(e) {
     e.preventDefault();
     var categoryName = $(this).data('category');
-    showCategoryItems(categoryName);
+    showCategoryItems(categoryName, currentFormatFilter);
   });
 
   $(document).on('click', '#back-to-categories', function(e) {
     e.preventDefault();
-    showCategories();
+    showCategories(currentFormatFilter);
   });
 
   $(document).on('click', '#toggle-view', function(e) {
     e.preventDefault();
     useCategorySystem = !useCategorySystem;
-    
+
     if (useCategorySystem) {
-      showCategories();
+      if (currentCategory) {
+        showCategoryItems(currentCategory, currentFormatFilter);
+      } else {
+        showCategories(currentFormatFilter);
+      }
     } else {
       showOriginalItems();
+    }
+  });
+
+  // Format filter event handlers
+  $(document).on('click', 'input[name="format"]', function() {
+    currentFormatFilter = $(this).val();
+
+    if (currentCategory) {
+      showCategoryItems(currentCategory, currentFormatFilter);
+    } else {
+      showCategories(currentFormatFilter);
     }
   });
 
