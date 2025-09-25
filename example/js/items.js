@@ -223,7 +223,21 @@ $(document).ready(function() {
       "type" : "1",
       "format" : "gltf",
       "height" : 12
-    }
+    },
+    {
+      "name" : "Bath (GLTF)",
+      "image" : "models/thumbnails/thumbnail_cb-blue-block60x96.png",
+      "model" : "gltf/pathflat.json",
+      "type" : "1",
+      "format" : "js"
+    },
+    {
+      "name" : "Kepler Toilet Floor Standing (JS) kkk",
+      "image" : "models/js/Kepler Toilet Floor Standing.png",
+      "model" : "gltf/pathlatestone.json",
+      "type" : "1",
+      "format" : "js"
+    },
   ];
 
   var itemsDiv = $("#items-wrapper");
@@ -307,7 +321,8 @@ $(document).ready(function() {
       "Bathroom": {
         "icon": "glyphicon-tint",
         "items": filteredItems.filter(function(item) {
-          return item.name.indexOf("Kepler") !== -1;
+          return item.name.indexOf("Kepler") !== -1 ||
+                 item.name.indexOf("Bath") !== -1;
         })
       }
     };
