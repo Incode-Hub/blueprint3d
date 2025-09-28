@@ -358,33 +358,33 @@ $(document).ready(function() {
     currentCategory = null;
     
     // Add header with toggle button and format selector
-    var headerHtml = '<div class="col-xs-12" style="margin-bottom: 20px;">' +
-                      '<div class="row">' +
-                        '<div class="col-xs-6">' +
-                          '<h4 class="text-center" style="margin: 5px 0; color: #666;">Select a Category</h4>' +
-                        '</div>' +
-                        '<div class="col-xs-3 text-center">' +
-                          '<label style="font-size: 12px; margin: 0;">Model Format:</label><br>' +
-                          '<div class="btn-group btn-group-xs" data-toggle="buttons">' +
-                            '<label class="btn btn-default ' + (formatFilter === 'all' ? 'active' : '') + '" id="format-all">' +
-                              '<input type="radio" name="format" value="all" ' + (formatFilter === 'all' ? 'checked' : '') + '> All' +
-                            '</label>' +
-                            '<label class="btn btn-default ' + (formatFilter === 'js' ? 'active' : '') + '" id="format-js">' +
-                              '<input type="radio" name="format" value="js" ' + (formatFilter === 'js' ? 'checked' : '') + '> JS' +
-                            '</label>' +
-                            '<label class="btn btn-default ' + (formatFilter === 'gltf' ? 'active' : '') + '" id="format-gltf">' +
-                              '<input type="radio" name="format" value="gltf" ' + (formatFilter === 'gltf' ? 'checked' : '') + '> GLTF' +
-                            '</label>' +
-                          '</div>' +
-                        '</div>' +
-                        '<div class="col-xs-3 text-right">' +
-                          '<button class="btn btn-xs btn-default" id="toggle-view">' +
-                            '<span class="glyphicon glyphicon-list"></span> List View' +
-                          '</button>' +
-                        '</div>' +
-                      '</div>' +
-                    '</div>';
-    itemsDiv.append(headerHtml);
+    // var headerHtml = '<div class="col-xs-12" style="margin-bottom: 20px;">' +
+    //                   '<div class="row">' +
+    //                     '<div class="col-xs-6">' +
+    //                       '<h4 class="text-center" style="margin: 5px 0; color: #666;">Select a Category</h4>' +
+    //                     '</div>' +
+    //                     '<div class="col-xs-3 text-center">' +
+    //                       '<label style="font-size: 12px; margin: 0;">Model Format:</label><br>' +
+    //                       '<div class="btn-group btn-group-xs" data-toggle="buttons">' +
+    //                         '<label class="btn btn-default ' + (formatFilter === 'all' ? 'active' : '') + '" id="format-all">' +
+    //                           '<input type="radio" name="format" value="all" ' + (formatFilter === 'all' ? 'checked' : '') + '> All' +
+    //                         '</label>' +
+    //                         '<label class="btn btn-default ' + (formatFilter === 'js' ? 'active' : '') + '" id="format-js">' +
+    //                           '<input type="radio" name="format" value="js" ' + (formatFilter === 'js' ? 'checked' : '') + '> JS' +
+    //                         '</label>' +
+    //                         '<label class="btn btn-default ' + (formatFilter === 'gltf' ? 'active' : '') + '" id="format-gltf">' +
+    //                           '<input type="radio" name="format" value="gltf" ' + (formatFilter === 'gltf' ? 'checked' : '') + '> GLTF' +
+    //                         '</label>' +
+    //                       '</div>' +
+    //                     '</div>' +
+    //                     '<div class="col-xs-3 text-right">' +
+    //                       '<button class="btn btn-xs btn-default" id="toggle-view">' +
+    //                         '<span class="glyphicon glyphicon-list"></span> List View' +
+    //                       '</button>' +
+    //                     '</div>' +
+    //                   '</div>' +
+    //                 '</div>';
+    // itemsDiv.append(headerHtml);
 
     // Add category folders
     for (var categoryName in itemCategories) {
@@ -446,25 +446,25 @@ $(document).ready(function() {
                             '<span class="glyphicon ' + category.icon + '"></span> ' + categoryName +
                           '</h4>' +
                         '</div>' +
-                        '<div class="col-xs-3 text-center">' +
-                          '<label style="font-size: 12px; margin: 0;">Model Format:</label><br>' +
-                          '<div class="btn-group btn-group-xs" data-toggle="buttons">' +
-                            '<label class="btn btn-default ' + (formatFilter === 'all' ? 'active' : '') + '" id="format-all">' +
-                              '<input type="radio" name="format" value="all" ' + (formatFilter === 'all' ? 'checked' : '') + '> All' +
-                            '</label>' +
-                            '<label class="btn btn-default ' + (formatFilter === 'js' ? 'active' : '') + '" id="format-js">' +
-                              '<input type="radio" name="format" value="js" ' + (formatFilter === 'js' ? 'checked' : '') + '> JS' +
-                            '</label>' +
-                            '<label class="btn btn-default ' + (formatFilter === 'gltf' ? 'active' : '') + '" id="format-gltf">' +
-                              '<input type="radio" name="format" value="gltf" ' + (formatFilter === 'gltf' ? 'checked' : '') + '> GLTF' +
-                            '</label>' +
-                          '</div>' +
-                        '</div>' +
-                        '<div class="col-xs-3 text-right">' +
-                          '<button class="btn btn-xs btn-default" id="toggle-view">' +
-                            '<span class="glyphicon glyphicon-list"></span> List View' +
-                          '</button>' +
-                        '</div>' +
+                        // '<div class="col-xs-3 text-center">' +
+                        //   '<label style="font-size: 12px; margin: 0;">Model Format:</label><br>' +
+                        //   '<div class="btn-group btn-group-xs" data-toggle="buttons">' +
+                        //     '<label class="btn btn-default ' + (formatFilter === 'all' ? 'active' : '') + '" id="format-all">' +
+                        //       '<input type="radio" name="format" value="all" ' + (formatFilter === 'all' ? 'checked' : '') + '> All' +
+                        //     '</label>' +
+                        //     '<label class="btn btn-default ' + (formatFilter === 'js' ? 'active' : '') + '" id="format-js">' +
+                        //       '<input type="radio" name="format" value="js" ' + (formatFilter === 'js' ? 'checked' : '') + '> JS' +
+                        //     '</label>' +
+                        //     '<label class="btn btn-default ' + (formatFilter === 'gltf' ? 'active' : '') + '" id="format-gltf">' +
+                        //       '<input type="radio" name="format" value="gltf" ' + (formatFilter === 'gltf' ? 'checked' : '') + '> GLTF' +
+                        //     '</label>' +
+                        //   '</div>' +
+                        // '</div>' +
+                        // '<div class="col-xs-3 text-right">' +
+                        //   '<button class="btn btn-xs btn-default" id="toggle-view">' +
+                        //     '<span class="glyphicon glyphicon-list"></span> List View' +
+                        //   '</button>' +
+                        // '</div>' +
                       '</div>' +
                     '</div>';
     itemsDiv.append(headerHtml);
