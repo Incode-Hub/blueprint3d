@@ -211,7 +211,7 @@ $(document).ready(function() {
     {
       "name" : "Kepler Toilet Floor Standing (GLTF)",
       "image" : "models/js/Kepler Toilet Floor Standing.png",
-      "model" : "gltf/new/floor_kepler.json",
+      "model" : "gltf/bathone.json",
       "type" : "1",
       "format" : "gltf"
     },
