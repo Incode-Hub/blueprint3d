@@ -211,15 +211,14 @@ $(document).ready(function() {
     {
       "name" : "Kepler Toilet Floor Standing (GLTF)",
       "image" : "models/js/Kepler Toilet Floor Standing.png",
-      "model" : "gltf/Kepler Toilet Floor Standing.gltf",
+      "model" : "gltf/new/floor_kepler.json",
       "type" : "1",
       "format" : "gltf"
     },
-    // Sample GLTF item for testing
     {
       "name" : "Sample Box (GLTF)",
       "image" : "models/thumbnails/thumbnail_cb-blue-block60x96.png",
-      "model" : "models/sample-box.gltf",
+      "model" : "models/new/kepler_basin_70_pedestal.json",
       "type" : "1",
       "format" : "gltf",
       "height" : 12
@@ -227,16 +226,16 @@ $(document).ready(function() {
     {
       "name" : "Bath (GLTF)",
       "image" : "models/thumbnails/thumbnail_cb-blue-block60x96.png",
-      "model" : "gltf/pathflat.json",
+      "model" : "gltf/new/kepler_basin_70_half_pedestal.json",
       "type" : "1",
-      "format" : "js"
+      "format" : "gltf"
     },
     {
-      "name" : "Kepler Toilet Floor Standing (JS) kkk",
+      "name" : "Kepler Toilet Floor Standing",
       "image" : "models/js/Kepler Toilet Floor Standing.png",
-      "model" : "gltf/pathlatestone.json",
+      "model" : "gltf/new/kepler_basin_70.json",
       "type" : "1",
-      "format" : "js"
+      "format" : "gltf"
     },
   ];
 
