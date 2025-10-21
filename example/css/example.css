@@ -127,6 +127,8 @@ div {
   overflow: hidden;
   background: #fff;
   position: relative;
+  display: block;
+  pointer-events: auto;
 }
 .btn-file {
   display: inline-block;
@@ -153,9 +155,16 @@ div {
 .add-item img {
   transition: all 0.3s ease;
   border-radius: 4px;
+  pointer-events: none; /* Prevent image from capturing clicks */
+  user-select: none;
 }
 .add-item:hover img {
   transform: scale(1.1);
+}
+/* Ensure all child elements don't capture clicks */
+.add-item * {
+  pointer-events: none;
+  user-select: none;
 }
 
 /* Do not block drags except on buttons */

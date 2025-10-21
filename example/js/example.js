@@ -476,20 +476,23 @@
       }
     }
     function initItems(){
-      $('#add-items').find('.add-item').on('mousedown touchstart', function(){
-        var modelUrl=$(this).attr('model-url');
-        var itemType=parseInt($(this).attr('model-type'),10);
-        var thumbnailUrl=$(this).attr('model-image') || $(this).find('img').attr('src');
-        var metadata={ itemName:$(this).attr('model-name'), resizable:true, modelUrl:modelUrl, itemType:itemType, thumbnailUrl:thumbnailUrl };
-        blueprint3d.model.scene.addItem(itemType, modelUrl, metadata);
-        setState(scope.states.DEFAULT);
-      });
-      $('#add-items').on('mousedown touchstart', '.add-item', function(){
-        if ($(this).data('static-bound')) return;
-        var modelUrl=$(this).attr('model-url');
-        var itemType=parseInt($(this).attr('model-type'),10);
-        var thumbnailUrl=$(this).attr('model-image') || $(this).find('img').attr('src');
-        var metadata={ itemName:$(this).attr('model-name'), resizable:true, modelUrl:modelUrl, itemType:itemType, thumbnailUrl:thumbnailUrl };
+      // Use single event delegation for all add-item elements
+      $('#add-items').on('mousedown touchstart', '.add-item', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        
+        var $target = $(this);
+        var modelUrl = $target.attr('model-url');
+        var itemType = parseInt($target.attr('model-type'), 10);
+        var thumbnailUrl = $target.attr('model-image') || $target.find('img').attr('src');
+        var metadata = { 
+          itemName: $target.attr('model-name'), 
+          resizable: true, 
+          modelUrl: modelUrl, 
+          itemType: itemType, 
+          thumbnailUrl: thumbnailUrl 
+        };
+        
         blueprint3d.model.scene.addItem(itemType, modelUrl, metadata);
         setState(scope.states.DEFAULT);
       });

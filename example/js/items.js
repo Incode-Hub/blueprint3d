@@ -340,7 +340,7 @@ $(document).ready(function() {
                   item.model +
                   '" model-type="' +
                   item.type + 
-                  '" data-static-bound="true"><img src="' +
+                  '"><img src="' +
                   item.image + 
                   '" alt="Add Item"> '+
                   item.name +

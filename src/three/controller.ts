@@ -328,8 +328,8 @@ module BP3D.Three {
     // sets coords to -1 to 1
     function normalizeVector2(vec2) {
       var retVec = new THREE.Vector2();
-      retVec.x = ((vec2.x - three.widthMargin) / (window.innerWidth - three.widthMargin)) * 2 - 1;
-      retVec.y = -((vec2.y - three.heightMargin) / (window.innerHeight - three.heightMargin)) * 2 + 1;
+      retVec.x = ((vec2.x - three.widthMargin) / three.elementWidth) * 2 - 1;
+      retVec.y = -((vec2.y - three.heightMargin) / three.elementHeight) * 2 + 1;
       return retVec;
     }
 
