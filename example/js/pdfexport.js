@@ -644,6 +644,85 @@ var PDFExporter = function (blueprint3d) {
 
   // This section was removed to fix duplicate code
 
+  // Capture 3D view as screenshot and download
+  this.capture3DScreenshot = function () {
+    try {
+      // Force a render to ensure the latest view is captured
+      if (blueprint3d.three.render) {
+        blueprint3d.three.render();
+      }
+
+      // Try multiple methods to get the canvas
+      var canvas = null;
+
+      // Method 1: Try to get from renderer.domElement
+      if (blueprint3d.three.renderer && blueprint3d.three.renderer.domElement) {
+        canvas = blueprint3d.three.renderer.domElement;
+        console.log("Canvas found via renderer.domElement");
+      }
+
+      // Method 2: Try to find canvas in #viewer
+      if (!canvas) {
+        canvas = $("#viewer canvas")[0];
+        if (canvas) {
+          console.log("Canvas found in #viewer");
+        }
+      }
+
+      // Method 3: Try to find any canvas element
+      if (!canvas) {
+        canvas = $("canvas")[0];
+        if (canvas) {
+          console.log("Canvas found via generic selector");
+        }
+      }
+
+      if (!canvas) {
+        console.error("Canvas not found with any method");
+        $("#pdf-status")
+          .removeClass("alert-success")
+          .addClass("alert-danger")
+          .text("Failed to capture: Canvas not found")
+          .show();
+        setTimeout(function () {
+          $("#pdf-status").fadeOut();
+        }, 3000);
+        return;
+      }
+
+      // Convert canvas to image
+      var imgData = canvas.toDataURL("image/png", 1.0);
+
+      // Create a temporary link to download the image
+      var link = document.createElement("a");
+      link.download = "blueprint3d-screenshot-" + Date.now() + ".png";
+      link.href = imgData;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Show success message
+      $("#pdf-status")
+        .removeClass("alert-danger")
+        .addClass("alert-success")
+        .text("Screenshot captured successfully!")
+        .show();
+      setTimeout(function () {
+        $("#pdf-status").fadeOut();
+      }, 3000);
+    } catch (error) {
+      console.error("Error capturing screenshot:", error);
+      $("#pdf-status")
+        .removeClass("alert-success")
+        .addClass("alert-danger")
+        .text("Failed to capture screenshot: " + error.message)
+        .show();
+      setTimeout(function () {
+        $("#pdf-status").fadeOut();
+      }, 3000);
+    }
+  };
+
   // Update the selected items count
   this.updateSelectedItemsCount = function () {
     var items = blueprint3d.model.scene.getItems();
@@ -675,6 +754,10 @@ var PDFExporter = function (blueprint3d) {
 
     $("#export-items-list").click(function () {
       scope.exportAllItemsToPDF();
+    });
+
+    $("#capture-3d-screenshot").click(function () {
+      scope.capture3DScreenshot();
     });
 
     $("#clear-selected-items").click(function () {

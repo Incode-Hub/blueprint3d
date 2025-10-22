@@ -197,30 +197,30 @@ $(document).ready(function() {
     {
       "name" : "Kepler Basin 70 Pedestal (GLTF)",
       "image" : "models/js/Kepler Basin 70 Pedestal.png",
-      "model" : "gltf/Kepler Basin 70 Pedestal.gltf",
+      "model" : "gltf/new/Kepler Basin 70 Pedestal.gltf",
       "type" : "1",
       "format" : "gltf"
     },
     {
       "name" : "Kepler Basin 70 (GLTF)",
       "image" : "models/js/Kepler Basin 70.png",
-      "model" : "gltf/Kepler Basin 70.gltf",
+      "model" : "gltf/new/floor_kepler.json",
       "type" : "1",
-      "format" : "gltf"
+      "format" : "json"
     },
     {
       "name" : "Kepler Toilet Floor Standing (GLTF)",
       "image" : "models/js/Kepler Toilet Floor Standing.png",
-      "model" : "gltf/bathone.json",
+      "model" : "gltf/new/bathone.json",
       "type" : "1",
-      "format" : "gltf"
+      "format" : "json"
     },
     {
       "name" : "Sample Box (GLTF)",
       "image" : "models/thumbnails/thumbnail_cb-blue-block60x96.png",
       "model" : "models/new/kepler_basin_70_pedestal.json",
       "type" : "1",
-      "format" : "gltf",
+      "format" : "json",
       "height" : 12
     },
     {
@@ -228,14 +228,14 @@ $(document).ready(function() {
       "image" : "models/thumbnails/thumbnail_cb-blue-block60x96.png",
       "model" : "gltf/new/kepler_basin_70_half_pedestal.json",
       "type" : "1",
-      "format" : "gltf"
+      "format" : "json"
     },
     {
       "name" : "Kepler Toilet Floor Standing",
       "image" : "models/js/Kepler Toilet Floor Standing.png",
       "model" : "gltf/new/kepler_basin_70.json",
       "type" : "1",
-      "format" : "gltf"
+      "format" : "json"
     },
   ];
 
