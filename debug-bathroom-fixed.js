@@ -9,7 +9,7 @@ async function debugBathroom() {
   const page = await browser.newPage();
 
   try {
-    console.log('Loading page...');
+    console.log('Loading page... >>>>>>');
     await page.goto('http://localhost:8080/example/index.html', { waitUntil: 'networkidle0' });
 
     console.log('Clicking Design tab...');
