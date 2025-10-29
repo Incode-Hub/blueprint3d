@@ -169,17 +169,17 @@ $(document).ready(function () {
     // Kepler Bathroom Models (GLTF format)
 
     {
-      name: "Kepler Toilet Floor Standing (GLTF)",
+      name: "Kepler Toilet Floor Standing",
       image: "gltf/new/Kepler FS Bowl ceramic Handle-1000x808.jpg",
-      model: "gltf/new/bathone.json",
+      model: "gltf/new/keplertoiletFloorstanding.json",
       type: "1",
       format: "json",
     },
 
     {
-      name: "Kepler Toilet Floor Standing",
+      name: "Kepler Basin 70 with half pedestal",
       image: "gltf/new/Ceramics_Kepler Pedestal-1000x808.png",
-      model: "gltf/new/unnnantitled.json",
+      model: "gltf/new/keplerbasin70withhalfpedestal.json",
       type: "1",
       format: "json",
     },

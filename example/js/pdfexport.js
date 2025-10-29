@@ -506,7 +506,7 @@ var PDFExporter = function (blueprint3d) {
             var modelName = metadata.modelUrl.split("/").pop().replace(".js", "");
             pdf.setFontSize(8);
             pdf.setTextColor(120, 120, 120);
-            pdf.text("Model: " + modelName, textX, textY);
+            // pdf.text("Model: " + modelName, textX, textY);
             textY += 8;
           }
 
