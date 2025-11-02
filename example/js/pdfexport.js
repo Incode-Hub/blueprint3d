@@ -6,6 +6,18 @@ var PDFExporter = function (blueprint3d) {
   var blueprint3d = blueprint3d;
   var scope = this;
 
+  // Helper: get the active WebGL canvas reliably
+  function getRendererCanvas() {
+    try {
+      if (blueprint3d && blueprint3d.three && blueprint3d.three.renderer && blueprint3d.three.renderer.domElement) {
+        return blueprint3d.three.renderer.domElement;
+      }
+    } catch (e) {}
+    var el = document.querySelector('#viewer canvas');
+    if (el) return el;
+    return document.querySelector('canvas');
+  }
+
   // Test if the jsPDF library is loaded
   this.testPDFLibrary = function () {
     if (typeof window.jspdf === "undefined") {
@@ -46,7 +58,10 @@ var PDFExporter = function (blueprint3d) {
       }
 
       // Capture the canvas image
-      var canvas = $(".three").find("canvas")[0];
+      var canvas = getRendererCanvas();
+      if (!canvas) {
+        throw new Error("WebGL canvas not found");
+      }
       var imgData = canvas.toDataURL("image/jpeg", 0.8);
 
       // Restore original camera position and target
@@ -84,7 +99,7 @@ var PDFExporter = function (blueprint3d) {
       var pdf = new jsPDF();
 
       // Get the WebGL canvas - find the canvas in the three container
-      var canvas = $(".three").find("canvas")[0];
+      var canvas = getRendererCanvas();
       if (!canvas) {
         console.error("Canvas not found");
         $("#pdf-loading-modal").hide();
@@ -207,6 +222,563 @@ var PDFExporter = function (blueprint3d) {
     }
 
     return null;
+  };
+
+  // Compute a simple bounding box for the current scene items
+  function computeSceneBounds(items) {
+    var minX = Infinity,
+      maxX = -Infinity,
+      minZ = Infinity,
+      maxZ = -Infinity,
+      maxSize = 0;
+    if (!items || items.length === 0) {
+      return {
+        center: new THREE.Vector3(0, 0, 0),
+        size: 100,
+      };
+    }
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      var pos = it.position || { x: 0, z: 0 };
+      var w = (typeof it.getWidth === "function" ? it.getWidth() : 0) || 0;
+      var d = (typeof it.getDepth === "function" ? it.getDepth() : 0) || 0;
+      var h = (typeof it.getHeight === "function" ? it.getHeight() : 0) || 0;
+      var halfW = w / 2;
+      var halfD = d / 2;
+      minX = Math.min(minX, pos.x - halfW);
+      maxX = Math.max(maxX, pos.x + halfW);
+      minZ = Math.min(minZ, pos.z - halfD);
+      maxZ = Math.max(maxZ, pos.z + halfD);
+      maxSize = Math.max(maxSize, w, d, h);
+    }
+    var sizeX = Math.abs(maxX - minX);
+    var sizeZ = Math.abs(maxZ - minZ);
+    var span = Math.max(sizeX, sizeZ, maxSize);
+    var center = new THREE.Vector3((minX + maxX) / 2, 0, (minZ + maxZ) / 2);
+    if (!isFinite(center.x) || !isFinite(center.z)) {
+      center = new THREE.Vector3(0, 0, 0);
+      span = 100;
+    }
+    return { center: center, size: Math.max(span, 50) };
+  }
+
+  // Capture two scene screenshots: top view and corner/angled view
+  this.captureSceneScreenshots = function () {
+    try {
+      // Stop auto-rotation to keep camera stable during capture
+      if (blueprint3d && blueprint3d.three && typeof blueprint3d.three.stopSpin === 'function') {
+        blueprint3d.three.stopSpin();
+      }
+      var items = blueprint3d.model.scene.getItems();
+      var bounds = computeSceneBounds(items);
+      var center = bounds.center;
+      var size = bounds.size;
+
+      var controls = blueprint3d.three.controls;
+      if (!controls || !controls.object) {
+        throw new Error("OrbitControls or camera not available");
+      }
+
+      var camera = controls.object;
+      var originalPos = camera.position.clone();
+      var originalTarget = controls.target.clone();
+
+      // Attempt to force transparent background during capture if supported
+      var renderer = (blueprint3d && blueprint3d.three) ? blueprint3d.three.renderer : null;
+      var supportsAlpha = false;
+      var origClearColor = null;
+      var origClearAlpha = 1;
+      try {
+        if (renderer && renderer.getContext) {
+          var attrs = renderer.getContext().getContextAttributes();
+          supportsAlpha = !!(attrs && attrs.alpha);
+        }
+        if (renderer && renderer.getClearColor) {
+          origClearColor = renderer.getClearColor().clone();
+        }
+        if (renderer && renderer.getClearAlpha) {
+          origClearAlpha = renderer.getClearAlpha();
+        }
+        if (supportsAlpha && renderer && renderer.setClearColor) {
+          // Set clear alpha to 0 for transparent capture
+          renderer.setClearColor(origClearColor || new THREE.Color(0x000000), 0);
+        }
+      } catch (e) {
+        // Non-fatal; transparency not guaranteed
+      }
+
+      // Helper to capture current canvas (PNG for high quality)
+      function grabCanvas() {
+        var canvas = getRendererCanvas();
+        if (!canvas) throw new Error("Canvas not found");
+        return canvas.toDataURL("image/png", 1.0);
+      }
+
+      // Top view (bird's eye)
+      var originalUp = camera.up.clone();
+      var originalFov = camera.fov;
+      camera.up.set(0, 0, 1); // orient so Z is up -> cleaner top view roll
+      camera.fov = Math.max(25, Math.min(45, camera.fov));
+      var topPos = new THREE.Vector3(center.x, size * 2.0, center.z);
+      camera.position.copy(topPos);
+      controls.target.copy(center);
+      controls.update && controls.update();
+      blueprint3d.three.needsUpdate = true;
+      if (blueprint3d.three.render) { blueprint3d.three.render(); blueprint3d.three.render(); }
+      var topImg = null;
+      try {
+        topImg = grabCanvas();
+      } catch (e) {
+        console.error("Top view capture failed:", e);
+      }
+
+      // Corner / angled view
+      var cornerPos = new THREE.Vector3(
+        center.x + size * 0.9,
+        size * 0.75,
+        center.z + size * 0.9
+      );
+      camera.position.copy(cornerPos);
+      camera.up.copy(originalUp); // restore normal orientation
+      camera.fov = originalFov;
+      controls.target.copy(center);
+      controls.update && controls.update();
+      blueprint3d.three.needsUpdate = true;
+      if (blueprint3d.three.render) { blueprint3d.three.render(); blueprint3d.three.render(); }
+      var cornerImg = null;
+      try {
+        cornerImg = grabCanvas();
+      } catch (e) {
+        console.error("Corner view capture failed:", e);
+      }
+
+      // Restore camera
+      camera.position.copy(originalPos);
+      camera.up.copy(originalUp);
+      camera.fov = originalFov;
+      controls.target.copy(originalTarget);
+      controls.update && controls.update();
+      blueprint3d.three.needsUpdate = true;
+      if (blueprint3d.three.render) blueprint3d.three.render();
+
+      // Restore renderer clear color/alpha
+      try {
+        if (renderer && renderer.setClearColor && origClearColor) {
+          renderer.setClearColor(origClearColor, origClearAlpha);
+        }
+      } catch (e) {}
+
+      return { topImg: topImg, cornerImg: cornerImg };
+    } catch (error) {
+      console.error("Error capturing scene screenshots:", error);
+      return { topImg: null, cornerImg: null };
+    }
+  };
+
+  // Map an item to test data structure used in items.js
+  function mapItemToTestData(item) {
+    var md = item && item.metadata ? item.metadata : {};
+    var name = md.itemName || md.name || "Unnamed Item";
+    var modelUrl = md.modelUrl || md.model || null;
+    // Try to derive format from model URL
+    var format = null;
+    if (modelUrl) {
+      var lower = modelUrl.toLowerCase();
+      if (lower.endsWith(".gltf")) format = "gltf";
+      else if (lower.endsWith(".glb")) format = "glb";
+      else if (lower.endsWith(".json")) format = "json";
+      else if (lower.endsWith(".js")) format = "js";
+    }
+    var type = md.type || md.itemType || "1";
+    var image = scope.getItemThumbnail(item) || md.image || null;
+    return {
+      name: name,
+      image: image,
+      model: modelUrl,
+      type: String(type),
+      format: format || (md.format || "js"),
+    };
+  }
+
+  // Helper function to generate fake product details
+  function generateFakeProductDetails(itemName, index) {
+    // Generate product codes
+    var productCodes = [
+      generateProductCode() + ": " + itemName,
+      generateProductCode() + ": " + itemName + " Unterbau",
+      generateProductCode() + ": " + itemName + " Spiegel"
+    ];
+
+    // Generate random dimensions
+    var width = (Math.random() * 100 + 50).toFixed(1);
+    var height = (Math.random() * 200 + 80).toFixed(1);
+    var depth = (Math.random() * 80 + 30).toFixed(1);
+
+    // Color options
+    var colors = ["Schwarz Hochglanz", "Weiß Supermatt", "Eiche Natur", "Anthrazit Matt", "Beige Seidenmatt"];
+    var korpusColors = ["Weiß Supermatt", "Schwarz Matt", "Graphit", "Eiche Dekor", "Nussbaum"];
+    var frontColors = ["66 Marmor Struktur PG 3", "Hochglanz Weiß", "Matt Schwarz", "Eiche Rustikal", "Beton Optik"];
+
+    // Article info variations
+    var articleInfos = [
+      "Waschplatz mit Möbelwaschtisch, Waschtischunterbau wandhängend mit 1 Auszug und 1 Schubkasten",
+      "Komplettset mit Spiegel, Handtuchhalter und Beleuchtung",
+      "Wandhängende Montage, inkl. Befestigungsmaterial",
+      "Mit Soft-Close Funktion und höhenverstellbaren Füßen"
+    ];
+
+    return {
+      productCodes: productCodes,
+      dimensions: "B / H / T " + width + " / " + height + " / " + depth + " cm",
+      articleInfo: "Artikelinfo " + articleInfos[index % articleInfos.length],
+      color: "Farbe " + colors[index % colors.length],
+      korpusColor: "Farbe Korpus " + korpusColors[index % korpusColors.length],
+      frontColor: "Farbe Front " + frontColors[index % frontColors.length],
+      heating: "Spiegelheizung " + (index % 2 === 0 ? "ohne" : "mit")
+    };
+  }
+
+  // Helper to generate random product code
+  function generateProductCode() {
+    var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var nums = "0123456789";
+    var code = "";
+
+    // 2-3 letters
+    for (var i = 0; i < 2; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+
+    // 8-12 digits
+    var digitCount = Math.floor(Math.random() * 5) + 8;
+    for (var j = 0; j < digitCount; j++) {
+      code += nums.charAt(Math.floor(Math.random() * nums.length));
+    }
+
+    return code;
+  }
+
+  // Export selected items (or all if none selected) with fake product details
+  this.exportSelectedItemsLayoutPDF = function () {
+    if (!this.testPDFLibrary()) {
+      alert("Error: jsPDF library not loaded!");
+      return;
+    }
+
+    try {
+      $("#pdf-loading-modal").show();
+      $("#pdf-loading-message").text("Generating Selected Items PDF...");
+
+      // Gather selected items; fallback to all when empty
+      var items = blueprint3d.model.scene.getItems() || [];
+      var selected = items.filter(function (it) {
+        return !!it.selected;
+      });
+      var usingFallbackAll = false;
+      if (selected.length === 0) {
+        selected = items.slice();
+        usingFallbackAll = true;
+      }
+
+      if (selected.length === 0) {
+        $("#pdf-loading-modal").hide();
+        $("#pdf-status")
+          .removeClass("alert-success")
+          .addClass("alert-danger")
+          .text("No items selected and scene is empty")
+          .show();
+        setTimeout(function () {
+          $("#pdf-status").fadeOut();
+        }, 3000);
+        return;
+      }
+
+      // Build PDF (no screenshots)
+      var { jsPDF } = window.jspdf;
+      var pdf = new jsPDF();
+      var pageWidth = pdf.internal.pageSize.getWidth();
+      var pageHeight = pdf.internal.pageSize.getHeight();
+      var margin = 15;
+      var contentWidth = pageWidth - margin * 2;
+      var curY = margin;
+
+      // Header (blue bar)
+      pdf.setFillColor(40, 96, 166);
+      pdf.rect(margin, curY, contentWidth, 12, "F");
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(12);
+      pdf.text("Artikelliste", margin + 4, curY + 8);
+
+      // Items list
+      curY += 16; // space below header
+      var itemGap = 8;
+
+      for (var i = 0; i < selected.length; i++) {
+        var data = mapItemToTestData(selected[i]);
+        var fakeDetails = generateFakeProductDetails(data.name || "Item", i);
+
+        // Calculate block height based on content
+        var blockHeight = 85;
+
+        // Check for page overflow
+        if (curY + blockHeight > pageHeight - margin) {
+          pdf.addPage();
+          // re-draw header on new page
+          curY = margin;
+          pdf.setFillColor(40, 96, 166);
+          pdf.rect(margin, curY, contentWidth, 12, "F");
+          pdf.setTextColor(255, 255, 255);
+          pdf.setFontSize(12);
+          pdf.text("Artikelliste (Fortsetzung)", margin + 4, curY + 8);
+          curY += 16;
+        }
+
+        // Block background for each item
+        pdf.setFillColor(245, 245, 245);
+        pdf.roundedRect(margin, curY, contentWidth, blockHeight, 2, 2, "F");
+
+        // Thumbnail (optional)
+        var thumb = data.image;
+        var thumbW = 20;
+        var thumbH = 20;
+        var thumbX = margin + 4;
+        var thumbY = curY + 4;
+        if (thumb) {
+          try {
+            pdf.addImage(thumb, "JPEG", thumbX, thumbY, thumbW, thumbH);
+          } catch (imgErr) {
+            console.warn("Thumbnail add failed:", imgErr);
+          }
+        }
+
+        var textX = thumb ? thumbX + thumbW + 4 : margin + 6;
+        var textY = curY + 8;
+
+        // Product codes (multiple lines)
+        pdf.setFont(undefined, "bold");
+        pdf.setFontSize(9);
+        pdf.setTextColor(0, 0, 0);
+        for (var j = 0; j < fakeDetails.productCodes.length; j++) {
+          pdf.text(fakeDetails.productCodes[j], textX, textY);
+          textY += 5;
+        }
+
+        textY += 3; // extra space
+
+        // Dimensions
+        pdf.setFont(undefined, "bold");
+        pdf.setFontSize(10);
+        pdf.text(fakeDetails.dimensions, textX, textY);
+        textY += 6;
+
+        // Article info
+        pdf.setFont(undefined, "normal");
+        pdf.setFontSize(8);
+        pdf.setTextColor(60, 60, 60);
+        var wrapped = pdf.splitTextToSize(fakeDetails.articleInfo, contentWidth - 12);
+        pdf.text(wrapped, textX, textY);
+        textY += wrapped.length * 4 + 4;
+
+        // Color details
+        pdf.setFontSize(8);
+        pdf.text(fakeDetails.color, textX, textY);
+        textY += 4;
+        pdf.text(fakeDetails.korpusColor, textX, textY);
+        textY += 4;
+        pdf.text(fakeDetails.frontColor, textX, textY);
+        textY += 4;
+        pdf.text(fakeDetails.heating, textX, textY);
+
+        // Advance cursor
+        curY += blockHeight + itemGap;
+      }
+
+      var fileName = usingFallbackAll
+        ? "blueprint3d-items-all.pdf"
+        : "blueprint3d-selected.pdf";
+      pdf.save(fileName);
+
+      $("#pdf-loading-modal").hide();
+      $("#pdf-status")
+        .removeClass("alert-danger")
+        .addClass("alert-success")
+        .text("PDF exported successfully!")
+        .show();
+      setTimeout(function () {
+        $("#pdf-status").fadeOut();
+      }, 3000);
+    } catch (error) {
+      console.error("Error exporting selected items layout:", error);
+      $("#pdf-loading-modal").hide();
+      $("#pdf-status")
+        .removeClass("alert-success")
+        .addClass("alert-danger")
+        .text("Failed to export: " + error.message)
+        .show();
+      setTimeout(function () {
+        $("#pdf-status").fadeOut();
+      }, 3000);
+    }
+  };
+
+  // Export current 3D design with two labeled perspectives (Top + 45° Corner)
+  this.exportMultiPerspectivePDF = function () {
+    if (!this.testPDFLibrary()) {
+      alert("Error: jsPDF library not loaded!");
+      return;
+    }
+
+    try {
+      // Show loading modal
+      $("#pdf-loading-modal").show();
+      $("#pdf-loading-message").text("Generating Multi-Perspective PDF...");
+
+      // Capture screenshots (this keeps camera stable and restores state afterward)
+      var shots = this.captureSceneScreenshots();
+      var hasAnyShot = !!(shots.topImg || shots.cornerImg);
+      if (!hasAnyShot) {
+        $("#pdf-loading-modal").hide();
+        $("#pdf-status")
+          .removeClass("alert-success")
+          .addClass("alert-danger")
+          .text("Could not capture screenshots from the viewer")
+          .show();
+        setTimeout(function () { $("#pdf-status").fadeOut(); }, 3000);
+        return;
+      }
+
+      var { jsPDF } = window.jspdf;
+      var pdf = new jsPDF();
+      var pageWidth = pdf.internal.pageSize.getWidth();
+      var pageHeight = pdf.internal.pageSize.getHeight();
+      var margin = 15;
+
+      // Title
+      pdf.setFontSize(16);
+      pdf.text("3D Design — Multi-Perspective Views", pageWidth / 2, margin, { align: "center" });
+
+      // Determine image sizing based on canvas aspect (fallback gracefully)
+      var canvas = (function(){ try { return getRendererCanvas(); } catch(e){ return null; } })();
+      var aspect = 0.6; // fallback aspect ratio if canvas not available
+      if (canvas && canvas.width && canvas.height && canvas.height > 0) {
+        aspect = canvas.height / canvas.width;
+      } else {
+        // If we can read properties via jsPDF
+        try {
+          if (shots.topImg) {
+            var p = pdf.getImageProperties(shots.topImg);
+            if (p.width && p.height) aspect = p.height / p.width;
+          }
+        } catch(_){}
+      }
+
+      var y = margin + 8;
+      var imgW = pageWidth - margin * 2;
+      var topH = imgW * aspect;
+      var cornerH = imgW * aspect;
+
+      // Top view block
+      pdf.setFontSize(11);
+      pdf.setTextColor(0, 0, 0);
+      pdf.text("Top View (Bird's-Eye)", margin, y);
+      y += 4;
+      if (shots.topImg) {
+        try {
+          // ensure height fits page; if it exceeds, reduce proportionally
+          if (y + topH > pageHeight - margin) {
+            topH = Math.max(40, (pageHeight - margin - y) - 10);
+          }
+          pdf.addImage(shots.topImg, "PNG", margin, y, imgW, topH);
+          pdf.setDrawColor(200, 200, 200);
+          pdf.rect(margin, y, imgW, topH);
+          // Caption below image
+          pdf.setFontSize(9);
+          pdf.setTextColor(60, 60, 60);
+          pdf.text("Top View (Bird's-Eye)", margin + imgW / 2, y + topH + 6, { align: "center" });
+          pdf.setTextColor(0, 0, 0);
+          y += topH + 10;
+        } catch (eTop) {
+          console.warn("Top view image add failed:", eTop);
+          pdf.setFillColor(240, 240, 240);
+          pdf.rect(margin, y, imgW, 40, "F");
+          pdf.setTextColor(150, 150, 150);
+          pdf.setFontSize(9);
+          pdf.text("Screenshot unavailable", margin + imgW / 2, y + 24, { align: "center" });
+          pdf.setTextColor(0, 0, 0);
+          y += 50;
+        }
+      } else {
+        pdf.setFillColor(240, 240, 240);
+        pdf.rect(margin, y, imgW, 40, "F");
+        pdf.setTextColor(150, 150, 150);
+        pdf.setFontSize(9);
+        pdf.text("Screenshot unavailable", margin + imgW / 2, y + 24, { align: "center" });
+        pdf.setTextColor(0, 0, 0);
+        y += 50;
+      }
+
+      // Corner view block
+      // If remaining space is tight, add a new page
+      if (y + cornerH + margin > pageHeight) {
+        pdf.addPage();
+        y = margin;
+      }
+      pdf.setFontSize(11);
+      pdf.text("Corner View (45°)", margin, y);
+      y += 4;
+      if (shots.cornerImg) {
+        try {
+          if (y + cornerH > pageHeight - margin) {
+            cornerH = Math.max(40, (pageHeight - margin - y) - 10);
+          }
+          pdf.addImage(shots.cornerImg, "PNG", margin, y, imgW, cornerH);
+          pdf.setDrawColor(200, 200, 200);
+          pdf.rect(margin, y, imgW, cornerH);
+          // Caption below image
+          pdf.setFontSize(9);
+          pdf.setTextColor(60, 60, 60);
+          pdf.text("Corner View (45°)", margin + imgW / 2, y + cornerH + 6, { align: "center" });
+          pdf.setTextColor(0, 0, 0);
+          y += cornerH + 10;
+        } catch (eCorner) {
+          console.warn("Corner view image add failed:", eCorner);
+          pdf.setFillColor(240, 240, 240);
+          pdf.rect(margin, y, imgW, 40, "F");
+          pdf.setTextColor(150, 150, 150);
+          pdf.setFontSize(9);
+          pdf.text("Screenshot unavailable", margin + imgW / 2, y + 24, { align: "center" });
+          pdf.setTextColor(0, 0, 0);
+          y += 50;
+        }
+      } else {
+        pdf.setFillColor(240, 240, 240);
+        pdf.rect(margin, y, imgW, 40, "F");
+        pdf.setTextColor(150, 150, 150);
+        pdf.setFontSize(9);
+        pdf.text("Screenshot unavailable", margin + imgW / 2, y + 24, { align: "center" });
+        pdf.setTextColor(0, 0, 0);
+        y += 50;
+      }
+
+      // Save and status
+      pdf.save("blueprint3d-multi-perspective.pdf");
+      $("#pdf-loading-modal").hide();
+      $("#pdf-status")
+        .removeClass("alert-danger")
+        .addClass("alert-success")
+        .text("Multi-perspective PDF exported successfully!")
+        .show();
+      setTimeout(function () { $("#pdf-status").fadeOut(); }, 3000);
+    } catch (err) {
+      console.error("Error exporting multi-perspective PDF:", err);
+      $("#pdf-loading-modal").hide();
+      $("#pdf-status")
+        .removeClass("alert-success")
+        .addClass("alert-danger")
+        .text("Failed to export multi-perspective PDF: " + err.message)
+        .show();
+      setTimeout(function () { $("#pdf-status").fadeOut(); }, 3000);
+    }
   };
 
   // Export all items as a list with thumbnails
@@ -756,8 +1328,18 @@ var PDFExporter = function (blueprint3d) {
       scope.exportAllItemsToPDF();
     });
 
+    // Optional new button (if present in DOM) to export selected items with screenshots
+    $("#export-selected-layout").click(function () {
+      scope.exportSelectedItemsLayoutPDF();
+    });
+
     $("#capture-3d-screenshot").click(function () {
       scope.capture3DScreenshot();
+    });
+
+    // Optional: export multi-perspective PDF of current 3D design
+    $("#export-multi-view-pdf").click(function () {
+      scope.exportMultiPerspectivePDF();
     });
 
     $("#clear-selected-items").click(function () {

@@ -65,12 +65,21 @@
             <button class="btn btn-outline-primary btn-sm btn-block" id="export-items-list">
               <span class="glyphicon glyphicon-download-alt"></span> Download Items List
             </button>
+            <button class="btn btn-outline-primary btn-sm btn-block" id="export-selected-layout">
+              <span class="glyphicon glyphicon-list-alt"></span> Export Selected + Views
+            </button>
+            <button class="btn btn-outline-primary btn-sm btn-block" id="export-multi-view-pdf">
+              <span class="glyphicon glyphicon-picture"></span> Export Multi-View PDF
+            </button>
             <button class="btn btn-outline-primary btn-sm btn-block" id="capture-3d-screenshot">
               <span class="glyphicon glyphicon-camera"></span> Screen Capture
             </button>
             <button class="btn btn-outline-warning btn-xs btn-block" id="clear-selected-items" style="margin-top:6px;">
               <span class="glyphicon glyphicon-refresh"></span> Clear Selection
             </button>
+            <div class="text-muted" style="margin-top:6px; font-size:11px;">
+              Selected items: <span id="selected-items-count">0</span>
+            </div>
             <div id="pdf-status" class="alert" style="display:none; margin-top:10px; padding:8px; font-size:11px;"></div>
           </div>
           <hr />

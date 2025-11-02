@@ -73,6 +73,7 @@ module BP3D.Three {
       try {
         renderer = new THREE.WebGLRenderer({
           antialias: true,
+          alpha: true,
           preserveDrawingBuffer: true // required to support .toDataURL()
         });
         renderer.autoClear = false,

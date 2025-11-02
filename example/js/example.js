@@ -560,6 +560,8 @@
     mainControls(blueprint3d);
     var mobileItemControls=new MobileItemControls(blueprint3d);
     var pdfExporter=new PDFExporter(blueprint3d); // Initialize PDF export functionality
+    // Expose globally for manual triggering or testing
+    window.PDFExporterInstance = pdfExporter;
     installMobileGuards(blueprint3d.three);
     enableMobileItemDrag(blueprint3d);
     bindRenderHook(blueprint3d.three);
