@@ -405,8 +405,8 @@ var PDFExporter = function (blueprint3d) {
     // Generate product codes
     var productCodes = [
       generateProductCode() + ": " + itemName,
-      generateProductCode() + ": " + itemName + " Unterbau",
-      generateProductCode() + ": " + itemName + " Spiegel"
+      generateProductCode() + ": " + itemName + " Base Unit",
+      generateProductCode() + ": " + itemName + " Mirror"
     ];
 
     // Generate random dimensions
@@ -415,26 +415,26 @@ var PDFExporter = function (blueprint3d) {
     var depth = (Math.random() * 80 + 30).toFixed(1);
 
     // Color options
-    var colors = ["Schwarz Hochglanz", "Weiß Supermatt", "Eiche Natur", "Anthrazit Matt", "Beige Seidenmatt"];
-    var korpusColors = ["Weiß Supermatt", "Schwarz Matt", "Graphit", "Eiche Dekor", "Nussbaum"];
-    var frontColors = ["66 Marmor Struktur PG 3", "Hochglanz Weiß", "Matt Schwarz", "Eiche Rustikal", "Beton Optik"];
+    var colors = ["Black High Gloss", "White Super Matte", "Natural Oak", "Anthracite Matte", "Beige Silk Matte"];
+    var korpusColors = ["White Super Matte", "Black Matte", "Graphite", "Oak Decor", "Walnut"];
+    var frontColors = ["66 Marble Structure PG 3", "High Gloss White", "Matte Black", "Rustic Oak", "Concrete Look"];
 
     // Article info variations
     var articleInfos = [
-      "Waschplatz mit Möbelwaschtisch, Waschtischunterbau wandhängend mit 1 Auszug und 1 Schubkasten",
-      "Komplettset mit Spiegel, Handtuchhalter und Beleuchtung",
-      "Wandhängende Montage, inkl. Befestigungsmaterial",
-      "Mit Soft-Close Funktion und höhenverstellbaren Füßen"
+      "Washbasin with furniture washbasin, wall-mounted base unit with 1 drawer and 1 compartment",
+      "Complete set with mirror, towel holder and lighting",
+      "Wall-mounted installation, incl. mounting material",
+      "With soft-close function and height-adjustable feet"
     ];
 
     return {
       productCodes: productCodes,
-      dimensions: "B / H / T " + width + " / " + height + " / " + depth + " cm",
-      articleInfo: "Artikelinfo " + articleInfos[index % articleInfos.length],
-      color: "Farbe " + colors[index % colors.length],
-      korpusColor: "Farbe Korpus " + korpusColors[index % korpusColors.length],
-      frontColor: "Farbe Front " + frontColors[index % frontColors.length],
-      heating: "Spiegelheizung " + (index % 2 === 0 ? "ohne" : "mit")
+      dimensions: "W / H / D " + width + " / " + height + " / " + depth + " cm",
+      articleInfo: "Article Info: " + articleInfos[index % articleInfos.length],
+      color: "Color: " + colors[index % colors.length],
+      korpusColor: "Body Color: " + korpusColors[index % korpusColors.length],
+      frontColor: "Front Color: " + frontColors[index % frontColors.length],
+      heating: "Mirror Heating: " + (index % 2 === 0 ? "without" : "with")
     };
   }
 
@@ -507,7 +507,7 @@ var PDFExporter = function (blueprint3d) {
       pdf.rect(margin, curY, contentWidth, 12, "F");
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(12);
-      pdf.text("Artikelliste", margin + 4, curY + 8);
+      pdf.text("Items List", margin + 4, curY + 8);
 
       // Items list
       curY += 16; // space below header
@@ -517,8 +517,8 @@ var PDFExporter = function (blueprint3d) {
         var data = mapItemToTestData(selected[i]);
         var fakeDetails = generateFakeProductDetails(data.name || "Item", i);
 
-        // Calculate block height based on content
-        var blockHeight = 85;
+        // Calculate block height based on content (increased for larger thumbnails)
+        var blockHeight = 105;
 
         // Check for page overflow
         if (curY + blockHeight > pageHeight - margin) {
@@ -529,7 +529,7 @@ var PDFExporter = function (blueprint3d) {
           pdf.rect(margin, curY, contentWidth, 12, "F");
           pdf.setTextColor(255, 255, 255);
           pdf.setFontSize(12);
-          pdf.text("Artikelliste (Fortsetzung)", margin + 4, curY + 8);
+          pdf.text("Items List (Continued)", margin + 4, curY + 8);
           curY += 16;
         }
 
@@ -539,8 +539,8 @@ var PDFExporter = function (blueprint3d) {
 
         // Thumbnail (optional)
         var thumb = data.image;
-        var thumbW = 20;
-        var thumbH = 20;
+        var thumbW = 50;
+        var thumbH = 50;
         var thumbX = margin + 4;
         var thumbY = curY + 4;
         if (thumb) {
@@ -554,13 +554,17 @@ var PDFExporter = function (blueprint3d) {
         var textX = thumb ? thumbX + thumbW + 4 : margin + 6;
         var textY = curY + 8;
 
+        // Calculate available width for text to prevent overflow
+        var textWidth = contentWidth - (textX - margin) - 8;
+
         // Product codes (multiple lines)
         pdf.setFont(undefined, "bold");
         pdf.setFontSize(9);
         pdf.setTextColor(0, 0, 0);
         for (var j = 0; j < fakeDetails.productCodes.length; j++) {
-          pdf.text(fakeDetails.productCodes[j], textX, textY);
-          textY += 5;
+          var wrappedCode = pdf.splitTextToSize(fakeDetails.productCodes[j], textWidth);
+          pdf.text(wrappedCode, textX, textY);
+          textY += wrappedCode.length * 5;
         }
 
         textY += 3; // extra space
@@ -568,26 +572,34 @@ var PDFExporter = function (blueprint3d) {
         // Dimensions
         pdf.setFont(undefined, "bold");
         pdf.setFontSize(10);
-        pdf.text(fakeDetails.dimensions, textX, textY);
-        textY += 6;
+        var wrappedDims = pdf.splitTextToSize(fakeDetails.dimensions, textWidth);
+        pdf.text(wrappedDims, textX, textY);
+        textY += wrappedDims.length * 6;
 
         // Article info
         pdf.setFont(undefined, "normal");
         pdf.setFontSize(8);
         pdf.setTextColor(60, 60, 60);
-        var wrapped = pdf.splitTextToSize(fakeDetails.articleInfo, contentWidth - 12);
+        var wrapped = pdf.splitTextToSize(fakeDetails.articleInfo, textWidth);
         pdf.text(wrapped, textX, textY);
         textY += wrapped.length * 4 + 4;
 
         // Color details
         pdf.setFontSize(8);
-        pdf.text(fakeDetails.color, textX, textY);
-        textY += 4;
-        pdf.text(fakeDetails.korpusColor, textX, textY);
-        textY += 4;
-        pdf.text(fakeDetails.frontColor, textX, textY);
-        textY += 4;
-        pdf.text(fakeDetails.heating, textX, textY);
+        var wrappedColor = pdf.splitTextToSize(fakeDetails.color, textWidth);
+        pdf.text(wrappedColor, textX, textY);
+        textY += wrappedColor.length * 4;
+
+        var wrappedKorpus = pdf.splitTextToSize(fakeDetails.korpusColor, textWidth);
+        pdf.text(wrappedKorpus, textX, textY);
+        textY += wrappedKorpus.length * 4;
+
+        var wrappedFront = pdf.splitTextToSize(fakeDetails.frontColor, textWidth);
+        pdf.text(wrappedFront, textX, textY);
+        textY += wrappedFront.length * 4;
+
+        var wrappedHeating = pdf.splitTextToSize(fakeDetails.heating, textWidth);
+        pdf.text(wrappedHeating, textX, textY);
 
         // Advance cursor
         curY += blockHeight + itemGap;
