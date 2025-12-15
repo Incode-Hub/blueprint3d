@@ -179,7 +179,7 @@ $(document).ready(function () {
     {
       name: "Kepler Basin 70 with half pedestal",
       image: "gltf/new/Ceramics_Kepler Pedestal-1000x808.png",
-      model: "gltf/new/keplerbasin70withhalfpedestal.json",
+      model: "gltf/new/untitfvfvfvfvfvfvfsssssled.json",
       type: "1",
       format: "json",
     },
