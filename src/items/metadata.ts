@@ -6,11 +6,14 @@ module BP3D.Items {
 
     /** Type of the item. */
     itemType?: number;
-    
+
     /** Url of the model. */
     modelUrl?: string;
 
     /** Resizeable or not */
     resizable?: boolean;
+
+    /** Vertical offset from floor */
+    yOffset?: number;
   }
 }

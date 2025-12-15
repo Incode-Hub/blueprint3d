@@ -485,12 +485,15 @@
         var modelUrl = $target.attr('model-url');
         var itemType = parseInt($target.attr('model-type'), 10);
         var thumbnailUrl = $target.attr('model-image') || $target.find('img').attr('src');
-        var metadata = { 
+        var yOffset = parseFloat($target.attr('model-y-offset'));
+        var metadata = {  
           itemName: $target.attr('model-name'), 
           resizable: true, 
           modelUrl: modelUrl, 
           itemType: itemType, 
-          thumbnailUrl: thumbnailUrl 
+          itemType: itemType, 
+          thumbnailUrl: thumbnailUrl,
+          yOffset: yOffset
         };
         
         blueprint3d.model.scene.addItem(itemType, modelUrl, metadata);

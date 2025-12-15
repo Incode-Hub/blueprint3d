@@ -19,12 +19,20 @@ module BP3D.Items {
         this.position.x = center.x;
         this.position.z = center.z;
         this.position.y = 0.5 * (this.geometry.boundingBox.max.y - this.geometry.boundingBox.min.y);
+
+        if (this.metadata.yOffset) {
+          this.position.y += this.metadata.yOffset;
+        }
       }
     };
 
     /** Take action after a resize */
     public resized() {
       this.position.y = this.halfSize.y;
+
+      if (this.metadata.yOffset) {
+        this.position.y += this.metadata.yOffset;
+      }
     }
 
     /** */

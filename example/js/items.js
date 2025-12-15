@@ -182,6 +182,7 @@ $(document).ready(function () {
       model: "gltf/new/keplerbasin70withhalfpedestal.json",
       type: "1",
       format: "json",
+      yOffset: 50,
     },
   ];
 
@@ -299,6 +300,8 @@ $(document).ready(function () {
         item.model +
         '" model-type="' +
         item.type +
+        '" model-y-offset="' +
+        (item.yOffset || 0) +
         '"><img src="' +
         item.image +
         '" alt="Add Item"> ' +
@@ -452,6 +455,8 @@ $(document).ready(function () {
         item.model +
         '" model-type="' +
         item.type +
+        '" model-y-offset="' +
+        (item.yOffset || 0) +
         '" style="text-align: center; transition: all 0.2s ease;">' +
         '<img src="' +
         item.image +
