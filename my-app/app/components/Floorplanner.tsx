@@ -27,8 +27,14 @@ export default function Floorplanner() {
 
   useEffect(() => {
     if (appState === "FLOORPLANNER" && blueprint3d) {
-      blueprint3d.floorplanner.resizeView();
-      blueprint3d.floorplanner.reset();
+      // Timeout to allow DOM to update display: block
+      const timer = setTimeout(() => {
+        window.requestAnimationFrame(() => {
+          blueprint3d.floorplanner.resizeView();
+          blueprint3d.floorplanner.reset();
+        });
+      }, 200);
+      return () => clearTimeout(timer);
     }
   }, [appState, blueprint3d]);
 
