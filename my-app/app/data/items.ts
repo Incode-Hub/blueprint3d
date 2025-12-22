@@ -163,11 +163,4 @@ export const items = [
         type: "1",
         format: "json",
     },
-    {
-        name: "Kepler Basin 70 with Half Pedestal (GLTF)",
-        image: "gltf/new/Ceramics_Kepler Pedestal-1000x808.png",
-        model: "gltf/Kepler Basin 70 with half pedestal (1).gltf",
-        type: "1",
-        format: "gltf",
-    },
 ];
