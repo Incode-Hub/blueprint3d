@@ -125,7 +125,11 @@ export default function AddItems() {
     setAppState("VIEWER");
   };
 
-  const style = appState === "ADD_ITEMS" ? {} : { display: "none" };
+  // Explicitly set display: 'block' to ensure visibility
+  const style: React.CSSProperties =
+    appState === "ADD_ITEMS"
+      ? { display: "block", height: "100%", overflowY: "auto" }
+      : { display: "none" };
 
   return (
     <div id="add-items" style={style}>

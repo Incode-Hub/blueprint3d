@@ -99,7 +99,11 @@ export default function Viewer() {
     }
   };
 
-  const style = appState === "VIEWER" ? {} : { display: "none" };
+  // Explicitly set display: 'block' to ensure visibility overrides any external hiding
+  const style: React.CSSProperties =
+    appState === "VIEWER"
+      ? { display: "block", height: "100%", position: "relative" }
+      : { display: "none" };
 
   return (
     <div id="viewer" style={style}>

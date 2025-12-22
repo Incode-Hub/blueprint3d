@@ -41,7 +41,11 @@ export default function Floorplanner() {
     setAppState("VIEWER");
   };
 
-  const style = appState === "FLOORPLANNER" ? {} : { display: "none" };
+  // Explicitly set display: 'block' to ensure visibility
+  const style: React.CSSProperties =
+    appState === "FLOORPLANNER"
+      ? { display: "block", height: "100%", position: "relative" }
+      : { display: "none" };
 
   // Constants from BP3D (assuming they match)
   const MODES = {
