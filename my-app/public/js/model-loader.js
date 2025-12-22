@@ -138,22 +138,49 @@
     var uvs = payload.uvs ? (payload.uvs.constructor === Float32Array ? payload.uvs : new Float32Array(payload.uvs)) : null;
 
     var geom = new THREE_NS.Geometry();
-    if (!positions || !indices) {
+    
+    // Validate we have minimum required data
+    if (!positions || positions.length < 9) {
+      console.warn('Invalid geometry data, using fallback box');
       return new THREE_NS.Mesh(
-        new THREE_NS.BoxGeometry(1,1,1),
+        new THREE_NS.BoxGeometry(50, 50, 50),
         new THREE_NS.MeshLambertMaterial({ color: payload.color || 0x8888ff, side: THREE_NS.DoubleSide })
       );
     }
+    
+    // If no indices, create them
+    if (!indices || indices.length === 0) {
+      var vertCount = positions.length / 3;
+      indices = new Uint32Array(vertCount);
+      for (var i = 0; i < vertCount; i++) {
+        indices[i] = i;
+      }
+    }
+    
+    // Build vertices
     var vertCount = positions.length / 3;
     for (var i = 0; i < vertCount; i++) {
       geom.vertices.push(new THREE_NS.Vector3(
         positions[i*3+0], positions[i*3+1], positions[i*3+2]
       ));
     }
+    
+    // Build faces
     geom.faceVertexUvs[0] = [];
     for (var f = 0; f < indices.length; f += 3) {
+      if (f + 2 >= indices.length) break; // Safety check
+      
       var a = indices[f], b = indices[f+1], c = indices[f+2];
-      geom.faces.push(new THREE_NS.Face3(a,b,c));
+      
+      // Validate indices
+      if (a >= vertCount || b >= vertCount || c >= vertCount) {
+        console.warn('Invalid face indices, skipping face');
+        continue;
+      }
+      
+      geom.faces.push(new THREE_NS.Face3(a, b, c));
+      
+      // Add UVs if available
       if (uvs && uvs.length/2 >= vertCount) {
         geom.faceVertexUvs[0].push([
           new THREE_NS.Vector2(uvs[a*2+0], uvs[a*2+1]),
@@ -162,17 +189,27 @@
         ]);
       }
     }
+    
     geom.computeFaceNormals();
     geom.computeVertexNormals();
+    geom.computeBoundingSphere();
 
-    var mat = new THREE_NS.MeshLambertMaterial({ color: payload.color || 0x8888ff, side: THREE_NS.DoubleSide });
+    var mat = new THREE_NS.MeshLambertMaterial({ 
+      color: payload.color || 0xcccccc, 
+      side: THREE_NS.DoubleSide 
+    });
+    
     if (payload.mapSrc) {
       try {
         var tex = new THREE_NS.TextureLoader().load(payload.mapSrc);
         tex.flipY = false;
-        mat.map = tex; mat.needsUpdate = true;
-      } catch (e) {}
+        mat.map = tex;
+        mat.needsUpdate = true;
+      } catch (e) {
+        console.warn('Failed to load texture:', e);
+      }
     }
+    
     return new THREE_NS.Mesh(geom, mat);
   }
 
